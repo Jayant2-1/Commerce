@@ -31,7 +31,6 @@ export default function Register() {
       <AuthVideoBackground />
       <div className="auth-card">
         <div className="auth-header">
-          <span className="auth-icon">✦</span>
           <h2>Create Account</h2>
           <p>Join Commerce today</p>
         </div>

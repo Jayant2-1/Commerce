@@ -5,20 +5,28 @@ import { cartApi } from '../../api/cart';
 import { wishlistApi } from '../../api/wishlist';
 import { reviewApi } from '../../api/reviews';
 import { useAuth } from '../../context/AuthContext';
+import { useCart } from '../../context/CartContext';
 import { toast } from 'react-toastify';
 import { FiStar, FiShoppingCart, FiHeart, FiMinus, FiPlus } from 'react-icons/fi';
 import { getProductImageUrl } from '../../utils/productMedia';
+import WishlistSelectorModal from '../../components/WishlistSelectorModal';
 
 export default function ProductDetail() {
   const { slug } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { applyCart } = useCart();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const [reviews, setReviews] = useState([]);
   const [addingToCart, setAddingToCart] = useState(false);
   const [activeImage, setActiveImage] = useState(0);
+  const [wishlists, setWishlists] = useState([]);
+  const [selectedWishlistId, setSelectedWishlistId] = useState('');
+  const [showWishlistSelector, setShowWishlistSelector] = useState(false);
+  const [loadingWishlists, setLoadingWishlists] = useState(false);
+  const [addingToWishlist, setAddingToWishlist] = useState(false);
 
   useEffect(() => {
     if (!slug) return;
@@ -41,11 +49,13 @@ export default function ProductDetail() {
       const existingItem = cartRes.data.data?.items?.find(
         i => i.product?.id === product.id || i.productId === product.id
       );
+      let updatedCart;
       if (existingItem) {
-        await cartApi.updateItem(existingItem.id, { quantity: existingItem.quantity + quantity });
+        updatedCart = await cartApi.updateItem(existingItem.id, { quantity: existingItem.quantity + quantity });
       } else {
-        await cartApi.addItem({ productId: product.id, quantity });
+        updatedCart = await cartApi.addItem({ productId: product.id, quantity });
       }
+      applyCart(updatedCart.data.data);
       toast.success('Added to cart');
     } catch {
       toast.error('Failed to add to cart');
@@ -56,19 +66,38 @@ export default function ProductDetail() {
 
   const handleAddToWishlist = async () => {
     if (!user) { navigate('/login'); return; }
+    setLoadingWishlists(true);
     try {
-      const wl = await wishlistApi.getAll();
-      const lists = wl.data.data || [];
-      if (lists.length === 0) {
-        const created = await wishlistApi.create('My Wishlist');
-        await wishlistApi.addItem(created.data.data.id, product.id);
-      } else {
-        await wishlistApi.addItem(lists[0].id, product.id);
-      }
+      const response = await wishlistApi.getAll();
+      const lists = response.data?.data;
+      if (!Array.isArray(lists)) throw new Error('The wishlists response was not a list.');
+      setWishlists(lists);
+      setSelectedWishlistId('');
+      setShowWishlistSelector(true);
+    } catch (err) {
+      toast.error(err.response?.data?.message || err.message || 'Could not load wishlists');
+    } finally {
+      setLoadingWishlists(false);
+    }
+  };
+
+  const addToSelectedWishlist = async () => {
+    if (!selectedWishlistId) return;
+    setAddingToWishlist(true);
+    try {
+      await wishlistApi.addItem(selectedWishlistId, product.id);
+      setShowWishlistSelector(false);
       toast.success('Added to wishlist!');
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed to add to wishlist');
+      toast.error(err.response?.data?.message || err.message || 'Failed to add to wishlist');
+    } finally {
+      setAddingToWishlist(false);
     }
+  };
+
+  const closeWishlistSelector = () => {
+    setShowWishlistSelector(false);
+    setSelectedWishlistId('');
   };
 
   if (loading) return <div className="page-loading"><div className="spinner" /></div>;
@@ -142,8 +171,8 @@ export default function ProductDetail() {
             <button className="btn-primary" onClick={handleAddToCart} disabled={!inStock || addingToCart}>
               <FiShoppingCart /> {addingToCart ? 'Adding...' : 'Add to Cart'}
             </button>
-            <button className="btn-outline" onClick={handleAddToWishlist}>
-              <FiHeart /> Wishlist
+            <button className="btn-outline" onClick={handleAddToWishlist} disabled={loadingWishlists}>
+              <FiHeart /> {loadingWishlists ? 'Loading wishlists...' : 'Wishlist'}
             </button>
           </div>
 
@@ -177,6 +206,16 @@ export default function ProductDetail() {
           </div>
         )}
       </section>
+
+      <WishlistSelectorModal
+        open={showWishlistSelector}
+        wishlists={wishlists}
+        selectedWishlistId={selectedWishlistId}
+        onSelect={setSelectedWishlistId}
+        onClose={closeWishlistSelector}
+        onConfirm={addToSelectedWishlist}
+        confirming={addingToWishlist}
+      />
     </div>
   );
 }

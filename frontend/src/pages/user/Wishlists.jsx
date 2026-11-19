@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { wishlistApi } from '../../api/wishlist';
+import { useCart } from '../../context/CartContext';
 import { FiHeart, FiTrash2, FiShoppingCart, FiPlus } from 'react-icons/fi';
 import { toast } from 'react-toastify';
 import { getProductImageUrl } from '../../utils/productMedia';
 
 export default function Wishlists() {
+  const { refreshCart } = useCart();
   const [wishlists, setWishlists] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
@@ -61,6 +63,7 @@ export default function Wishlists() {
   const moveToCart = async (wishlistId, itemId) => {
     try {
       await wishlistApi.moveToCart(wishlistId, itemId, 1);
+      await refreshCart();
       fetchWishlists();
       toast.success('Moved to cart!');
     } catch (err) {

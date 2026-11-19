@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cartApi } from '../../api/cart';
+import { useCart } from '../../context/CartContext';
 import { addressApi } from '../../api/addresses';
 import { orderApi } from '../../api/orders';
 import { paymentApi } from '../../api/payments';
@@ -9,6 +10,7 @@ import { FiMapPin, FiPlus, FiCheck, FiLock } from 'react-icons/fi';
 
 export default function Checkout() {
   const navigate = useNavigate();
+  const { refreshCart } = useCart();
   const [cart, setCart] = useState(null);
   const [addresses, setAddresses] = useState([]);
   const [selectedAddress, setSelectedAddress] = useState(null);
@@ -68,6 +70,7 @@ export default function Checkout() {
     try {
       const res = await orderApi.placeOrder({ addressId: selectedAddress, paymentMethod });
       const order = res.data.data;
+      await refreshCart();
       
       if (paymentMethod === 'COD') {
         toast.success('Order placed successfully! Pay on delivery');

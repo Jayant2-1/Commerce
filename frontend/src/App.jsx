@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
+import { CartProvider } from './context/CartContext';
 import Navbar from './components/Navbar';
 import Home from './pages/user/Home';
 import Shop from './pages/user/Shop';
@@ -28,47 +29,49 @@ function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
-        <Routes>
-          {/* Admin Routes */}
-          <Route path="/admin" element={<AdminLayout />}>
-            <Route index element={<AdminDashboard />} />
-            <Route path="products" element={<AdminProducts />} />
-            <Route path="categories" element={<AdminCategories />} />
-            <Route path="orders" element={<AdminOrders />} />
-            <Route path="users" element={<AdminUsers />} />
-            <Route path="coupons" element={<AdminCoupons />} />
-            <Route path="inventory" element={<AdminInventory />} />
-            <Route path="reviews" element={<AdminReviews />} />
-          </Route>
+        <CartProvider>
+          <Routes>
+            {/* Admin Routes */}
+            <Route path="/admin" element={<AdminLayout />}>
+              <Route index element={<AdminDashboard />} />
+              <Route path="products" element={<AdminProducts />} />
+              <Route path="categories" element={<AdminCategories />} />
+              <Route path="orders" element={<AdminOrders />} />
+              <Route path="users" element={<AdminUsers />} />
+              <Route path="coupons" element={<AdminCoupons />} />
+              <Route path="inventory" element={<AdminInventory />} />
+              <Route path="reviews" element={<AdminReviews />} />
+            </Route>
 
-          {/* Public with Navbar */}
-          <Route path="*" element={
-            <>
-              <Navbar />
-              <main className="main-content">
-                <Routes>
-                  <Route path="/" element={<Home />} />
-                  <Route path="/shop" element={<Shop />} />
-                  <Route path="/product/:slug" element={<ProductDetail />} />
-                  <Route path="/cart" element={<Cart />} />
-                  <Route path="/checkout" element={<Checkout />} />
-                  <Route path="/orders" element={<Orders />} />
-                  <Route path="/orders/:id" element={<OrderDetail />} />
-                  <Route path="/profile" element={<Profile />} />
-                  <Route path="/wishlists" element={<Wishlists />} />
-                  <Route path="/login" element={<Login />} />
-                  <Route path="/register" element={<Register />} />
-                </Routes>
-              </main>
-              <footer className="footer">
-                <div className="footer-content">
-                  <p>&copy; 2026 Commerce. All rights reserved.</p>
-                </div>
-              </footer>
-            </>
-          } />
-        </Routes>
-        <ToastContainer position="bottom-right" autoClose={2500} hideProgressBar theme="dark" />
+            {/* Public with Navbar */}
+            <Route path="*" element={
+              <>
+                <Navbar />
+                <main className="main-content">
+                  <Routes>
+                    <Route path="/" element={<Home />} />
+                    <Route path="/shop" element={<Shop />} />
+                    <Route path="/product/:slug" element={<ProductDetail />} />
+                    <Route path="/cart" element={<Cart />} />
+                    <Route path="/checkout" element={<Checkout />} />
+                    <Route path="/orders" element={<Orders />} />
+                    <Route path="/orders/:id" element={<OrderDetail />} />
+                    <Route path="/profile" element={<Profile />} />
+                    <Route path="/wishlists" element={<Wishlists />} />
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/register" element={<Register />} />
+                  </Routes>
+                </main>
+                <footer className="footer">
+                  <div className="footer-content">
+                    <p>&copy; 2026 Commerce. All rights reserved.</p>
+                  </div>
+                </footer>
+              </>
+            } />
+          </Routes>
+          <ToastContainer position="bottom-right" autoClose={2500} hideProgressBar theme="dark" />
+        </CartProvider>
       </BrowserRouter>
     </AuthProvider>
   );

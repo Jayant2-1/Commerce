@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useCart } from '../context/CartContext';
 import { FiShoppingCart, FiHeart, FiUser, FiLogOut, FiMenu, FiX, FiPackage, FiSearch } from 'react-icons/fi';
 
 export default function Navbar() {
   const { user, logout, isAdmin } = useAuth();
+  const { cartCount } = useCart();
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -44,7 +46,19 @@ export default function Navbar() {
           <Link to="/shop" className="nav-link">Shop</Link>
           {user ? (
             <>
-              <Link to="/cart" className="nav-link-icon" title="Cart"><FiShoppingCart size={20} /></Link>
+              <Link
+                to="/cart"
+                className="nav-link-icon"
+                title={cartCount > 0 ? `Cart (${cartCount})` : 'Cart'}
+                aria-label={cartCount > 0 ? `Cart, ${cartCount} items` : 'Cart'}
+              >
+                <FiShoppingCart size={20} />
+                {cartCount > 0 && (
+                  <span className="cart-count" aria-hidden="true">
+                    {cartCount > 99 ? '99+' : cartCount}
+                  </span>
+                )}
+              </Link>
               <Link to="/wishlists" className="nav-link-icon" title="Wishlist"><FiHeart size={20} /></Link>
               <Link to="/orders" className="nav-link" title="Orders"><FiPackage size={20} /></Link>
               {isAdmin && <Link to="/admin" className="nav-link admin-link">Admin</Link>}

@@ -1,4 +1,5 @@
 import { FiCheck, FiX } from 'react-icons/fi';
+import { Link } from 'react-router-dom';
 
 export default function WishlistSelectorModal({
   open,
@@ -15,17 +16,25 @@ export default function WishlistSelectorModal({
   }
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={(event) => event.stopPropagation()}>
+    <div className="modal-overlay wishlist-selector" onClick={onClose}>
+      <div
+        className="modal-content"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="wishlist-selector-title"
+        onClick={(event) => event.stopPropagation()}
+      >
         <div className="modal-header">
-          <h3>{title}</h3>
-          <button className="modal-close" onClick={onClose} type="button">
+          <h3 id="wishlist-selector-title">{title}</h3>
+          <button className="modal-close" onClick={onClose} type="button" aria-label="Close wishlist selector">
             <FiX />
           </button>
         </div>
         <div className="modal-body">
           {wishlists.length === 0 ? (
-            <p className="text-muted">No wishlists found. Please create one first.</p>
+            <p className="wishlist-empty">
+              No wishlists yet. <Link to="/wishlists">Create one</Link> to save this product.
+            </p>
           ) : (
             <div className="wishlist-options">
               {wishlists.map((wishlist) => (

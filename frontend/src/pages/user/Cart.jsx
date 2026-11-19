@@ -2,12 +2,14 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { cartApi } from '../../api/cart';
 import { couponApi } from '../../api/coupons';
+import { useCart } from '../../context/CartContext';
 import { toast } from 'react-toastify';
 import { FiTrash2, FiMinus, FiPlus, FiShoppingBag, FiTag } from 'react-icons/fi';
 import { getProductImageUrl } from '../../utils/productMedia';
 
 export default function Cart() {
   const navigate = useNavigate();
+  const { applyCart } = useCart();
   const [cart, setCart] = useState(null);
   const [loading, setLoading] = useState(true);
   const [couponCode, setCouponCode] = useState('');
@@ -17,16 +19,20 @@ export default function Cart() {
 
   useEffect(() => {
     cartApi.getCart()
-      .then((res) => setCart(res.data.data))
+      .then((res) => {
+        setCart(res.data.data);
+        applyCart(res.data.data);
+      })
       .catch(() => setCart(null))
       .finally(() => setLoading(false));
-  }, []);
+  }, [applyCart]);
 
   const updateQty = async (itemId, quantity) => {
     if (quantity < 1) return;
     try {
       const res = await cartApi.updateItem(itemId, { quantity });
       setCart(res.data.data);
+      applyCart(res.data.data);
     } catch (err) {
       toast.error(err.response?.data?.message || 'Update failed');
     }
@@ -36,6 +42,7 @@ export default function Cart() {
     try {
       const res = await cartApi.removeItem(itemId);
       setCart(res.data.data);
+      applyCart(res.data.data);
       toast.success('Item removed');
     } catch (err) {
       toast.error('Failed to remove');
