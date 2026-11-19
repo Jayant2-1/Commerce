@@ -71,7 +71,10 @@ public class CartService {
                         .build());
 
         item.setQuantity(item.getQuantity() + request.quantity());
-        cartItemRepository.save(item);
+        CartItem savedItem = cartItemRepository.save(item);
+        if (!cart.getItems().contains(savedItem)) {
+            cart.getItems().add(savedItem);
+        }
 
         inventory.reserve(request.quantity());
         inventoryRepository.save(inventory);
@@ -116,7 +119,7 @@ public class CartService {
         Inventory inventory = findInventory(item.getProduct().getId());
         inventory.releaseReservation(item.getQuantity());
 
-        cartItemRepository.delete(item);
+        cart.getItems().remove(item);
         inventoryRepository.save(inventory);
 
         return cartMapper.toResponse(reloadCart(userId));

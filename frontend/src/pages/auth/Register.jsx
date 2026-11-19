@@ -71,7 +71,7 @@ export default function Register() {
               value={form.password}
               onChange={(e) => setForm({ ...form, password: e.target.value })}
               required
-              minLength={6}
+              minLength={8}
             />
             <button type="button" className="toggle-pass" onClick={() => setShowPass(!showPass)}>
               {showPass ? <FiEyeOff /> : <FiEye />}

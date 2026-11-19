@@ -81,8 +81,8 @@ export default function ProductDetail() {
       <div className="product-detail">
         <div className="product-gallery">
           <div className="main-image">
-            {allImages[activeImage]?.url ? (
-              <img src={allImages[activeImage].url} alt={product.name} />
+            {allImages[activeImage]?.imageUrl ? (
+              <img src={allImages[activeImage].imageUrl} alt={product.name} />
             ) : (
               <div className="product-placeholder large">{product.name.charAt(0)}</div>
             )}
@@ -91,7 +91,7 @@ export default function ProductDetail() {
             <div className="image-thumbnails">
               {allImages.map((img, i) => (
                 <button key={i} className={i === activeImage ? 'active' : ''} onClick={() => setActiveImage(i)}>
-                  <img src={img.url} alt="" />
+                  <img src={img.imageUrl} alt="" />
                 </button>
               ))}
             </div>

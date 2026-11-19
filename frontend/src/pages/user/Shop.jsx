@@ -95,8 +95,8 @@ export default function Shop() {
                 {products.map((product) => (
                   <Link key={product.id} to={`/product/${product.slug}`} className={`product-card ${view === 'list' ? 'list-view' : ''}`}>
                     <div className="product-image">
-                      {product.images?.[0]?.url ? (
-                        <img src={product.images[0].url} alt={product.name} />
+                      {product.images?.[0]?.imageUrl ? (
+                        <img src={product.images[0].imageUrl} alt={product.name} />
                       ) : (
                         <div className="product-placeholder">{product.name.charAt(0)}</div>
                       )}
