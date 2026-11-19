@@ -14,6 +14,7 @@ import com.ecommerce.exception.ResourceNotFoundException;
 import com.ecommerce.mapper.ProductMapper;
 import com.ecommerce.repository.CategoryRepository;
 import com.ecommerce.repository.InventoryRepository;
+import com.ecommerce.repository.OrderItemRepository;
 import com.ecommerce.repository.ProductRepository;
 import com.ecommerce.specification.ProductSpecifications;
 import com.ecommerce.util.PageUtils;
@@ -38,6 +39,7 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
     private final InventoryRepository inventoryRepository;
+    private final OrderItemRepository orderItemRepository;
     private final ProductMapper productMapper;
 
     @Transactional
@@ -142,6 +144,9 @@ public class ProductService {
     public void deleteProduct(UUID productId) {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
+        if (orderItemRepository.existsByProductId(productId)) {
+            throw new ConflictException("Cannot delete a product included in existing orders");
+        }
         productRepository.delete(product);
     }
 

@@ -641,6 +641,7 @@
 | **DELETE** | `/api/v1/admin/products/{productId}` | 🔒 Delete product |
 
 **Path Param:** `productId` (UUID)
+**Response:** `409 Conflict` when the product is referenced by existing order history; purchase records are preserved.
 
 ---
 
