@@ -8,11 +8,19 @@ export default function AdminCategories() {
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState(null);
   const [form, setForm] = useState({ name: '', slug: '', description: '' });
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
 
   const fetchCategories = () => {
     adminApi.listCategories()
-      .then((res) => setCategories(res.data.data || []))
-      .catch(() => setCategories([]));
+      .then((res) => {
+        const data = res.data?.data;
+        if (!Array.isArray(data)) throw new Error('The categories response was not a list.');
+        setCategories(data);
+        setLoadError('');
+      })
+      .catch((err) => setLoadError(err.response?.data?.message || err.message || 'Could not load categories.'))
+      .finally(() => setLoading(false));
   };
 
   useEffect(() => { fetchCategories(); }, []);
@@ -42,7 +50,7 @@ export default function AdminCategories() {
       setShowForm(false);
       fetchCategories();
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed');
+      toast.error(err.response?.data?.message || err.message || 'Failed to save category');
     }
   };
 
@@ -53,7 +61,7 @@ export default function AdminCategories() {
       toast.success('Category deleted');
       fetchCategories();
     } catch (err) {
-      toast.error('Failed to delete');
+      toast.error(err.response?.data?.message || err.message || 'Failed to delete category');
     }
   };
 
@@ -63,47 +71,85 @@ export default function AdminCategories() {
         <h1>Categories</h1>
         <button className="btn-primary" onClick={openCreate}><FiPlus /> Add Category</button>
       </div>
+      <p className="page-meta">{categories.length} records</p>
 
       {showForm && (
-        <div className="modal-overlay" onClick={() => setShowForm(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <h2>{editId ? 'Edit Category' : 'Add Category'}</h2>
-            <form onSubmit={handleSubmit}>
-              <input placeholder="Name" value={form.name} onChange={(e) => setForm({...form, name: e.target.value})} required />
-              <input placeholder="Slug" value={form.slug} onChange={(e) => setForm({...form, slug: e.target.value})} required />
-              <textarea placeholder="Description" value={form.description} onChange={(e) => setForm({...form, description: e.target.value})} />
-              <div className="modal-actions">
-                <button type="button" className="btn-outline" onClick={() => setShowForm(false)}>Cancel</button>
-                <button type="submit" className="btn-primary">{editId ? 'Update' : 'Create'}</button>
-              </div>
-            </form>
+        <form className="admin-inline-form" onSubmit={handleSubmit}>
+          <h2>{editId ? 'Edit Category' : 'Add Category'}</h2>
+          <div className="category-form-fields">
+            <label>
+              Name
+              <input
+                value={form.name}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+                required
+                maxLength={100}
+              />
+            </label>
+            <label>
+              Slug
+              <input
+                value={form.slug}
+                onChange={(e) => setForm({ ...form, slug: e.target.value })}
+                required
+                maxLength={120}
+              />
+            </label>
+            <label className="category-description">
+              Description
+              <textarea
+                value={form.description}
+                onChange={(e) => setForm({ ...form, description: e.target.value })}
+                rows={3}
+                maxLength={500}
+              />
+            </label>
           </div>
+          <div className="form-actions">
+            <button type="button" className="btn-outline" onClick={() => setShowForm(false)}>Cancel</button>
+            <button type="submit" className="btn-primary">{editId ? 'Save Changes' : 'Create Category'}</button>
+          </div>
+        </form>
+      )}
+
+      {loadError && (
+        <div className="admin-error" role="alert">
+          <span>{loadError}</span>
+          <button type="button" onClick={() => { setLoading(true); fetchCategories(); }}>Try again</button>
         </div>
       )}
 
-      <table className="admin-table">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Slug</th>
-            <th>Description</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {categories.map((cat) => (
-            <tr key={cat.id}>
-              <td>{cat.name}</td>
-              <td>{cat.slug}</td>
-              <td>{cat.description?.slice(0, 60) || '-'}</td>
-              <td className="actions-cell">
-                <button className="btn-small" onClick={() => openEdit(cat)}><FiEdit2 /></button>
-                <button className="btn-small-danger" onClick={() => handleDelete(cat.id)}><FiTrash2 /></button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      {loading ? (
+        <div className="page-loading"><div className="spinner" /></div>
+      ) : !loadError && (
+        <div className="admin-table-wrap">
+          <table className="admin-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Slug</th>
+                <th>Description</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {categories.length === 0 ? (
+                <tr><td className="no-data" colSpan="4">No categories found.</td></tr>
+              ) : categories.map((cat) => (
+                <tr key={cat.id}>
+                  <td>{cat.name}</td>
+                  <td>{cat.slug}</td>
+                  <td>{cat.description?.slice(0, 60) || '-'}</td>
+                  <td className="actions-cell">
+                    <button className="btn-small" type="button" onClick={() => openEdit(cat)} aria-label={`Edit ${cat.name}`}><FiEdit2 /></button>
+                    <button className="btn-small-danger" type="button" onClick={() => handleDelete(cat.id)} aria-label={`Delete ${cat.name}`}><FiTrash2 /></button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }

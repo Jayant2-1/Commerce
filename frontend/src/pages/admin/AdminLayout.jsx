@@ -31,7 +31,7 @@ export default function AdminLayout() {
     <div className="admin-layout">
       <aside className="admin-sidebar">
         <div className="sidebar-brand">
-          <Link to="/admin">✦ VELORA</Link>
+          <Link to="/admin"><span aria-hidden="true">✦</span> Commerce</Link>
           <span className="sidebar-sub">Admin Panel</span>
         </div>
         <nav className="sidebar-nav">

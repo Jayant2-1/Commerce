@@ -27,7 +27,7 @@ export default function Navbar() {
       <div className="navbar-container">
         <Link to="/" className="navbar-brand">
           <span className="brand-icon">✦</span>
-          <span className="brand-text">{import.meta.env.VITE_APP_NAME || 'VELORA'}</span>
+          <span className="brand-text">Commerce</span>
         </Link>
 
         <form className="search-bar" onSubmit={handleSearch}>

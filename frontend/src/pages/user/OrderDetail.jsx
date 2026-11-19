@@ -115,7 +115,7 @@ export default function OrderDetail() {
         {order.items?.map((item) => (
           <div key={item.id} className="order-item">
             <div className="order-item-image">
-              <div className="product-placeholder">{item.productName?.charAt(0)}</div>
+              <img src="/images/product-placeholder.svg" alt={`${item.productName} image unavailable`} />
             </div>
             <div className="order-item-info">
               <h4>{item.productName}</h4>

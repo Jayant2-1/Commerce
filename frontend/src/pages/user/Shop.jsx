@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { productApi } from '../../api/products';
 import { FiStar, FiFilter, FiGrid, FiList } from 'react-icons/fi';
+import { getProductImageUrl } from '../../utils/productMedia';
 
 export default function Shop() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -95,11 +96,11 @@ export default function Shop() {
                 {products.map((product) => (
                   <Link key={product.id} to={`/product/${product.slug}`} className={`product-card ${view === 'list' ? 'list-view' : ''}`}>
                     <div className="product-image">
-                      {product.images?.[0]?.imageUrl ? (
-                        <img src={product.images[0].imageUrl} alt={product.name} />
-                      ) : (
-                        <div className="product-placeholder">{product.name.charAt(0)}</div>
-                      )}
+                      <img
+                        src={getProductImageUrl(product) || '/images/product-placeholder.svg'}
+                        alt={product.images?.[0]?.altText || product.name}
+                        onError={(e) => { e.currentTarget.src = '/images/product-placeholder.svg'; }}
+                      />
                       {product.discountPrice && (
                         <span className="discount-badge">
                           -{Math.round((1 - product.discountPrice / product.price) * 100)}%

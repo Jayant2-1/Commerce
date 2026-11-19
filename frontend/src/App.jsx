@@ -62,7 +62,7 @@ function App() {
               </main>
               <footer className="footer">
                 <div className="footer-content">
-                  <p>&copy; 2026 VELORA. All rights reserved.</p>
+                  <p>&copy; 2026 Commerce. All rights reserved.</p>
                 </div>
               </footer>
             </>

@@ -18,5 +18,5 @@ public interface ReviewRepository extends JpaRepository<Review, UUID> {
     Page<Review> findAllByProductIdAndStatus(UUID productId, ReviewStatus status, Pageable pageable);
 
     @Query("select coalesce(avg(r.rating), 0), count(r) from Review r where r.product.id = :productId and r.status = :status")
-    Object[] findRatingStats(@Param("productId") UUID productId, @Param("status") ReviewStatus status);
+    List<Object[]> findRatingStats(@Param("productId") UUID productId, @Param("status") ReviewStatus status);
 }

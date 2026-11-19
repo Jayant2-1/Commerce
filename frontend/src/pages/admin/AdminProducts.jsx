@@ -1,11 +1,22 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { adminApi } from '../../api/admin';
 import { FiPlus, FiEdit2, FiTrash2, FiSearch } from 'react-icons/fi';
 import { toast } from 'react-toastify';
+import { getProductImageUrl } from '../../utils/productMedia';
+
+function getErrorMessage(error) {
+  return error.response?.data?.message || error.message || 'Could not load products.';
+}
+
+function formatPrice(value) {
+  const price = Number(value);
+  return Number.isFinite(price) ? `₹${price.toLocaleString('en-IN')}` : '-';
+}
 
 export default function AdminProducts() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
   const [search, setSearch] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState(null);
@@ -15,19 +26,29 @@ export default function AdminProducts() {
   });
   const [categories, setCategories] = useState([]);
 
-  const fetchProducts = () => {
+  const fetchProducts = useCallback(() => {
     adminApi.searchProducts({ keyword: search, page: 0, size: 50 })
-      .then((res) => setProducts(res.data.data?.content || []))
-      .catch(() => setProducts([]))
+      .then((res) => {
+        const content = res.data?.data?.content;
+        if (!Array.isArray(content)) throw new Error('The products response was not a list.');
+        setProducts(content);
+        setLoadError('');
+      })
+      .catch((error) => setLoadError(getErrorMessage(error)))
       .finally(() => setLoading(false));
-  };
+  }, [search]);
 
   useEffect(() => {
-    adminApi.listCategories().then((res) => setCategories(res.data.data || [])).catch(() => {});
-    fetchProducts();
+    adminApi.listCategories()
+      .then((res) => {
+        const data = res.data?.data;
+        if (!Array.isArray(data)) throw new Error('The categories response was not a list.');
+        setCategories(data);
+      })
+      .catch((error) => toast.error(getErrorMessage(error)));
   }, []);
 
-  useEffect(() => { fetchProducts(); }, [search]);
+  useEffect(() => { fetchProducts(); }, [fetchProducts]);
 
   const openCreate = () => {
     setEditId(null);
@@ -57,9 +78,10 @@ export default function AdminProducts() {
         toast.success('Product created');
       }
       setShowForm(false);
+      setLoading(true);
       fetchProducts();
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Failed');
+      toast.error(getErrorMessage(err));
     }
   };
 
@@ -68,9 +90,10 @@ export default function AdminProducts() {
     try {
       await adminApi.deleteProduct(id);
       toast.success('Product deleted');
+      setLoading(true);
       fetchProducts();
     } catch (err) {
-      toast.error('Failed to delete');
+      toast.error(getErrorMessage(err));
     }
   };
 
@@ -83,7 +106,16 @@ export default function AdminProducts() {
 
       <div className="search-bar-admin">
         <FiSearch />
-        <input type="text" placeholder="Search products..." value={search} onChange={(e) => setSearch(e.target.value)} />
+        <input
+          type="text"
+          placeholder="Search products..."
+          value={search}
+          onChange={(e) => {
+            setLoading(true);
+            setLoadError('');
+            setSearch(e.target.value);
+          }}
+        />
       </div>
 
       {showForm && (
@@ -119,35 +151,65 @@ export default function AdminProducts() {
         </div>
       )}
 
-      <table className="admin-table">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Brand</th>
-            <th>Price</th>
-            <th>Discount</th>
-            <th>SKU</th>
-            <th>Rating</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {products.map((p) => (
-            <tr key={p.id}>
-              <td>{p.name}</td>
-              <td>{p.brand}</td>
-              <td>₹{p.price?.toLocaleString()}</td>
-              <td>{p.discountPrice ? `₹${p.discountPrice?.toLocaleString()}` : '-'}</td>
-              <td>{p.sku}</td>
-              <td>⭐ {p.avgRating?.toFixed(1)}</td>
-              <td className="actions-cell">
-                <button className="btn-small" onClick={() => openEdit(p)}><FiEdit2 /></button>
-                <button className="btn-small-danger" onClick={() => handleDelete(p.id)}><FiTrash2 /></button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      {loadError && (
+        <div className="admin-error" role="alert">
+          <span>{loadError}</span>
+          <button type="button" onClick={() => { setLoading(true); fetchProducts(); }}>Try again</button>
+        </div>
+      )}
+
+      {loading ? (
+        <div className="page-loading"><div className="spinner" /></div>
+      ) : !loadError && (
+        <div className="admin-table-wrap">
+          <table className="admin-table">
+            <thead>
+              <tr>
+                <th>Image</th>
+                <th>Name</th>
+                <th>Brand</th>
+                <th>Price</th>
+                <th>Discount</th>
+                <th>SKU</th>
+                <th>Rating</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {products.length === 0 ? (
+                <tr><td className="no-data" colSpan="8">No products found.</td></tr>
+              ) : products.map((p) => {
+                const image = p.images?.find((item) => item.isPrimary) || p.images?.[0];
+                return (
+                  <tr key={p.id}>
+                    <td>
+                      <img
+                        className="admin-product-thumbnail"
+                        src={getProductImageUrl({ ...p, images: image ? [image] : [] }) || '/images/product-placeholder.svg'}
+                        alt={image?.altText || `${p.name} image`}
+                        onError={(event) => {
+                          event.currentTarget.onerror = null;
+                          event.currentTarget.src = '/images/product-placeholder.svg';
+                        }}
+                      />
+                    </td>
+                    <td>{p.name}</td>
+                    <td>{p.brand || '-'}</td>
+                    <td>{formatPrice(p.price)}</td>
+                    <td>{p.discountPrice ? formatPrice(p.discountPrice) : '-'}</td>
+                    <td>{p.sku}</td>
+                    <td>⭐ {Number.isFinite(Number(p.avgRating)) ? Number(p.avgRating).toFixed(1) : '0.0'}</td>
+                    <td className="actions-cell">
+                      <button className="btn-small" type="button" onClick={() => openEdit(p)} aria-label={`Edit ${p.name}`}><FiEdit2 /></button>
+                      <button className="btn-small-danger" type="button" onClick={() => handleDelete(p.id)} aria-label={`Delete ${p.name}`}><FiTrash2 /></button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }

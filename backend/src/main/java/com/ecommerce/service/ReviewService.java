@@ -19,6 +19,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -81,12 +82,13 @@ public class ReviewService {
     }
 
     private void recalculateProductRatings(Product product) {
-        Object[] stats = reviewRepository.findRatingStats(product.getId(), ReviewStatus.APPROVED);
+        List<Object[]> statsRows = reviewRepository.findRatingStats(product.getId(), ReviewStatus.APPROVED);
 
         double avg = 0.0;
         int total = 0;
 
-        if (stats != null) {
+        if (!statsRows.isEmpty()) {
+            Object[] stats = statsRows.get(0);
             avg = stats[0] == null ? 0.0 : ((Number) stats[0]).doubleValue();
             total = stats[1] == null ? 0 : ((Number) stats[1]).intValue();
         }

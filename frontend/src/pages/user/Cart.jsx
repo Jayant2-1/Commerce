@@ -4,6 +4,7 @@ import { cartApi } from '../../api/cart';
 import { couponApi } from '../../api/coupons';
 import { toast } from 'react-toastify';
 import { FiTrash2, FiMinus, FiPlus, FiShoppingBag, FiTag } from 'react-icons/fi';
+import { getProductImageUrl } from '../../utils/productMedia';
 
 export default function Cart() {
   const navigate = useNavigate();
@@ -86,11 +87,11 @@ export default function Cart() {
           {cart.items.map((item) => (
             <div key={item.id} className="cart-item">
               <div className="cart-item-image">
-                {item.product?.images?.[0]?.imageUrl ? (
-                  <img src={item.product.images[0].imageUrl} alt={item.product.name} />
-                ) : (
-                  <div className="product-placeholder">{item.product?.name?.charAt(0)}</div>
-                )}
+                <img
+                  src={getProductImageUrl(item.product) || '/images/product-placeholder.svg'}
+                  alt={item.product?.images?.[0]?.altText || item.product?.name || 'Product'}
+                  onError={(e) => { e.currentTarget.src = '/images/product-placeholder.svg'; }}
+                />
               </div>
               <div className="cart-item-info">
                 <Link to={`/product/${item.product?.slug}`}><h3>{item.product?.name}</h3></Link>

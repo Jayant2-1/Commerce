@@ -14,6 +14,8 @@ public record UserResponse(
         Boolean isEmailVerified,
         String phone,
         String profileImageUrl,
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+        LocalDateTime updatedAt,
+        LocalDateTime lastLoginAt
 ) {
 }

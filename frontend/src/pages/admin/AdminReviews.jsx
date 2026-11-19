@@ -2,31 +2,38 @@ import { useState } from 'react';
 import { adminApi } from '../../api/admin';
 import { FiCheck, FiX } from 'react-icons/fi';
 import { toast } from 'react-toastify';
+import { reviewApi } from '../../api/reviews';
+
+function getErrorMessage(error) {
+  return error.response?.data?.message || error.message || 'Could not load reviews.';
+}
 
 export default function AdminReviews() {
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(false);
   const [fetched, setFetched] = useState(false);
+  const [loadError, setLoadError] = useState('');
 
   const fetchReviews = async () => {
     setLoading(true);
+    setLoadError('');
     try {
       const res = await adminApi.searchProducts({ page: 0, size: 100 });
-      const products = res.data.data?.content || [];
-      const allReviews = [];
-      for (const p of products) {
-        if (p.totalReviews > 0) {
-          try {
-            const revRes = await import('../../api/reviews').then(m => m.reviewApi.getByProduct(p.id, { page: 0, size: 100 }));
-            const productReviews = (revRes.data.data?.content || []).map(r => ({ ...r, productName: p.name }));
-            allReviews.push(...productReviews);
-          } catch(e) {}
-        }
-      }
-      setReviews(allReviews);
+      const products = res.data.data?.content;
+      if (!Array.isArray(products)) throw new Error('The products response was not a list.');
+      const reviewsByProduct = await Promise.all(products
+        .filter((product) => product.totalReviews > 0)
+        .map(async (product) => {
+          const reviewResponse = await reviewApi.getByProduct(product.id, { page: 0, size: 100 });
+          const productReviews = reviewResponse.data?.data?.content;
+          if (!Array.isArray(productReviews)) throw new Error(`Reviews for ${product.name} were not a list.`);
+          return productReviews.map((review) => ({ ...review, productName: product.name }));
+        }));
+      setReviews(reviewsByProduct.flat());
       setFetched(true);
     } catch (err) {
-      toast.error('Failed to fetch reviews');
+      setLoadError(getErrorMessage(err));
+      toast.error(getErrorMessage(err));
     } finally {
       setLoading(false);
     }
@@ -35,10 +42,12 @@ export default function AdminReviews() {
   const moderate = async (id, status) => {
     try {
       const res = await adminApi.moderateReview(id, status);
-      setReviews(reviews.map(r => r.id === id ? res.data.data : r));
+      setReviews((currentReviews) => currentReviews.map((review) => (
+        review.id === id ? { ...review, ...res.data.data, productName: review.productName } : review
+      )));
       toast.success(`Review ${status.toLowerCase()}`);
     } catch (err) {
-      toast.error('Failed to moderate');
+      toast.error(getErrorMessage(err));
     }
   };
 
@@ -46,17 +55,18 @@ export default function AdminReviews() {
     <div className="admin-page">
       <div className="admin-page-header">
         <h1>Review Moderation</h1>
-        {!fetched && (
-          <button className="btn-primary" onClick={fetchReviews} disabled={loading}>
-            {loading ? 'Loading...' : 'Load Reviews'}
-          </button>
-        )}
+        <button className="btn-primary" onClick={fetchReviews} disabled={loading}>
+          {loading ? 'Loading...' : fetched ? 'Refresh Reviews' : 'Load Reviews'}
+        </button>
       </div>
 
-      {fetched && reviews.length === 0 && <p className="no-data">No reviews found</p>}
+      {loadError && <div className="admin-error" role="alert"><span>{loadError}</span></div>}
+      {loading && <div className="page-loading"><div className="spinner" /></div>}
+      {!loading && fetched && reviews.length === 0 && <p className="no-data">No reviews found</p>}
 
-      {reviews.length > 0 && (
-        <table className="admin-table">
+      {!loading && reviews.length > 0 && (
+        <div className="admin-table-wrap">
+          <table className="admin-table">
           <thead>
             <tr>
               <th>Product</th>
@@ -95,7 +105,8 @@ export default function AdminReviews() {
               </tr>
             ))}
           </tbody>
-        </table>
+          </table>
+        </div>
       )}
     </div>
   );

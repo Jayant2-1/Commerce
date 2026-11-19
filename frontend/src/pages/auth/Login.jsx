@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { toast } from 'react-toastify';
 import { FiMail, FiLock, FiEye, FiEyeOff } from 'react-icons/fi';
+import AuthVideoBackground from '../../components/AuthVideoBackground';
 
 export default function Login() {
   const { login } = useAuth();
@@ -28,11 +29,12 @@ export default function Login() {
 
   return (
     <div className="auth-page">
+      <AuthVideoBackground />
       <div className="auth-card">
         <div className="auth-header">
           <span className="auth-icon">✦</span>
           <h2>Welcome Back</h2>
-          <p>Sign in to your VELORA account</p>
+          <p>Sign in to your Commerce account</p>
         </div>
         <form onSubmit={handleSubmit}>
           <div className="input-group">
