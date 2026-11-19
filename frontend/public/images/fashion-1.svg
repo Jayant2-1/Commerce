@@ -1,12 +1,10 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 720">
-  <defs>
-    <linearGradient id="bg" x2="1" y2="1"><stop stop-color="#f4eee8"/><stop offset="1" stop-color="#ddd0c5"/></linearGradient>
-    <linearGradient id="cloth" x2="1"><stop stop-color="#292725"/><stop offset="1" stop-color="#514b46"/></linearGradient>
-  </defs>
-  <rect width="640" height="720" fill="url(#bg)"/>
-  <path d="m222 124 98 34 98-34 91 83-61 80-38-30v307H230V257l-38 30-61-80z" fill="url(#cloth)"/>
-  <path d="m222 124 38 22 60 100 60-100 38-22-45 169H267z" fill="#74675d"/>
-  <path d="M268 293h104v271H268z" fill="#35312e"/>
-  <path d="M289 330h62M289 354h62M289 378h62" stroke="#74675d" stroke-width="5" opacity=".8"/>
-  <path d="m222 124 98 34 98-34M230 257l-38 30m256-30 38 30" fill="none" stroke="#91857b" stroke-width="5"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 760">
+  <rect width="640" height="760" fill="#eee9e1"/>
+  <path d="M0 600 640 480v280H0z" fill="#e1d8cc"/>
+  <path d="m244 124 76 42 76-42 96 82-54 102-34-22 8 324H228l8-324-34 22-54-102z" fill="#292b2c"/>
+  <path d="m244 124 76 42-46 93-62-53 32-82zm152 0-76 42 46 93 62-53-32-82z" fill="#424446"/>
+  <path d="m274 259 46-93 46 93-31 50h-30z" fill="#d2c8bc"/>
+  <path d="m320 309 30 351h-60z" fill="#1e2021"/>
+  <path d="M193 252 144 208l-28 55 72 46m259-57 49-44 28 55-72 46" fill="none" stroke="#181a1b" stroke-width="18"/>
+  <path d="M246 398h148" stroke="#77736e" stroke-width="3"/>
 </svg>

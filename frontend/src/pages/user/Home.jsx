@@ -99,9 +99,13 @@ export default function Home() {
               <Link key={product.id} to={`/product/${product.slug}`} className="product-card">
                 <div className="product-image">
                   {product.images?.[0]?.imageUrl ? (
-                    <img src={product.images[0].imageUrl} alt={product.name} />
+                    <img
+                      src={product.images[0].imageUrl}
+                      alt={product.images[0].altText || product.name}
+                      onError={(e) => { e.currentTarget.src = '/images/product-placeholder.svg'; }}
+                    />
                   ) : (
-                    <div className="product-placeholder">{product.name.charAt(0)}</div>
+                    <img src="/images/product-placeholder.svg" alt={`${product.name} image unavailable`} />
                   )}
                   {product.discountPrice && (
                     <span className="discount-badge">

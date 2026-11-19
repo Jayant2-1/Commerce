@@ -1804,6 +1804,12 @@ input, select, textarea {
   border-bottom: 1px solid var(--border-light);
   font-size: 0.9rem;
 }
+.admin-product-thumbnail {
+  width: 48px;
+  height: 48px;
+  border-radius: 6px;
+  object-fit: cover;
+}
 
 /* Toast overrides */
 .Toastify__toast {

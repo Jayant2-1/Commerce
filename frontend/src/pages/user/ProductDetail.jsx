@@ -82,16 +82,24 @@ export default function ProductDetail() {
         <div className="product-gallery">
           <div className="main-image">
             {allImages[activeImage]?.imageUrl ? (
-              <img src={allImages[activeImage].imageUrl} alt={product.name} />
+              <img
+                src={allImages[activeImage].imageUrl}
+                alt={allImages[activeImage].altText || product.name}
+                onError={(e) => { e.currentTarget.src = '/images/product-placeholder.svg'; }}
+              />
             ) : (
-              <div className="product-placeholder large">{product.name.charAt(0)}</div>
+              <img src="/images/product-placeholder.svg" alt={`${product.name} image unavailable`} />
             )}
           </div>
           {allImages.length > 1 && (
             <div className="image-thumbnails">
               {allImages.map((img, i) => (
                 <button key={i} className={i === activeImage ? 'active' : ''} onClick={() => setActiveImage(i)}>
-                  <img src={img.imageUrl} alt="" />
+                  <img
+                    src={img.imageUrl}
+                    alt={img.altText || ''}
+                    onError={(e) => { e.currentTarget.src = '/images/product-placeholder.svg'; }}
+                  />
                 </button>
               ))}
             </div>

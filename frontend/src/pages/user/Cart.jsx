@@ -87,9 +87,16 @@ export default function Cart() {
             <div key={item.id} className="cart-item">
               <div className="cart-item-image">
                 {item.product?.images?.[0]?.imageUrl ? (
-                  <img src={item.product.images[0].imageUrl} alt={item.product.name} />
+                  <img
+                    src={item.product.images[0].imageUrl}
+                    alt={item.product.images[0].altText || item.product.name}
+                    onError={(e) => { e.currentTarget.src = '/images/product-placeholder.svg'; }}
+                  />
                 ) : (
-                  <div className="product-placeholder">{item.product?.name?.charAt(0)}</div>
+                  <img
+                    src="/images/product-placeholder.svg"
+                    alt={`${item.product?.name || 'Product'} image unavailable`}
+                  />
                 )}
               </div>
               <div className="cart-item-info">

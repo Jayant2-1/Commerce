@@ -122,6 +122,7 @@ export default function AdminProducts() {
       <table className="admin-table">
         <thead>
           <tr>
+            <th>Image</th>
             <th>Name</th>
             <th>Brand</th>
             <th>Price</th>
@@ -132,20 +133,39 @@ export default function AdminProducts() {
           </tr>
         </thead>
         <tbody>
-          {products.map((p) => (
-            <tr key={p.id}>
-              <td>{p.name}</td>
-              <td>{p.brand}</td>
-              <td>₹{p.price?.toLocaleString()}</td>
-              <td>{p.discountPrice ? `₹${p.discountPrice?.toLocaleString()}` : '-'}</td>
-              <td>{p.sku}</td>
-              <td>⭐ {p.avgRating?.toFixed(1)}</td>
-              <td className="actions-cell">
-                <button className="btn-small" onClick={() => openEdit(p)}><FiEdit2 /></button>
-                <button className="btn-small-danger" onClick={() => handleDelete(p.id)}><FiTrash2 /></button>
-              </td>
-            </tr>
-          ))}
+          {products.map((p) => {
+            const image = p.images?.find((item) => item.isPrimary) || p.images?.[0];
+            return (
+              <tr key={p.id}>
+                <td>
+                  {image?.imageUrl ? (
+                    <img
+                      className="admin-product-thumbnail"
+                      src={image.imageUrl}
+                      alt={image.altText || p.name}
+                      onError={(e) => { e.currentTarget.src = '/images/product-placeholder.svg'; }}
+                    />
+                  ) : (
+                    <img
+                      className="admin-product-thumbnail"
+                      src="/images/product-placeholder.svg"
+                      alt={`${p.name} image unavailable`}
+                    />
+                  )}
+                </td>
+                <td>{p.name}</td>
+                <td>{p.brand}</td>
+                <td>₹{p.price?.toLocaleString()}</td>
+                <td>{p.discountPrice ? `₹${p.discountPrice?.toLocaleString()}` : '-'}</td>
+                <td>{p.sku}</td>
+                <td>⭐ {p.avgRating?.toFixed(1)}</td>
+                <td className="actions-cell">
+                  <button className="btn-small" onClick={() => openEdit(p)}><FiEdit2 /></button>
+                  <button className="btn-small-danger" onClick={() => handleDelete(p.id)}><FiTrash2 /></button>
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>

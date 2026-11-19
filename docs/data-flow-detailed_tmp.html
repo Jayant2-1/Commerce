@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>data-flow-detailed.md</title>
+<meta http-equiv="Content-type" content="text/html;charset=UTF-8">
+
+<style>
+/* https://github.com/microsoft/vscode/blob/master/extensions/markdown-language-features/media/markdown.css */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+body {
+	font-family: var(--vscode-markdown-font-family, -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif);
+	font-size: var(--vscode-markdown-font-size, 14px);
+	padding: 0 26px;
+	line-height: var(--vscode-markdown-line-height, 22px);
+	word-wrap: break-word;
+}
+
+#code-csp-warning {
+	position: fixed;
+	top: 0;
+	right: 0;
+	color: white;
+	margin: 16px;
+	text-align: center;
+	font-size: 12px;
+	font-family: sans-serif;
+	background-color:#444444;
+	cursor: pointer;
+	padding: 6px;
+	box-shadow: 1px 1px 1px rgba(0,0,0,.25);
+}
+
+#code-csp-warning:hover {
+	text-decoration: none;
+	background-color:#007acc;
+	box-shadow: 2px 2px 2px rgba(0,0,0,.25);
+}
+
+body.scrollBeyondLastLine {
+	margin-bottom: calc(100vh - 22px);
+}
+
+body.showEditorSelection .code-line {
+	position: relative;
+}
+
+body.showEditorSelection .code-active-line:before,
+body.showEditorSelection .code-line:hover:before {
+	content: "";
+	display: block;
+	position: absolute;
+	top: 0;
+	left: -12px;
+	height: 100%;
+}
+
+body.showEditorSelection li.code-active-line:before,
+body.showEditorSelection li.code-line:hover:before {
+	left: -30px;
+}
+
+.vscode-light.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.15);
+}
+
+.vscode-light.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(0, 0, 0, 0.40);
+}
+
+.vscode-light.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-dark.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.4);
+}
+
+.vscode-dark.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 255, 255, 0.60);
+}
+
+.vscode-dark.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+.vscode-high-contrast.showEditorSelection .code-active-line:before {
+	border-left: 3px solid rgba(255, 160, 0, 0.7);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line:hover:before {
+	border-left: 3px solid rgba(255, 160, 0, 1);
+}
+
+.vscode-high-contrast.showEditorSelection .code-line .code-line:hover:before {
+	border-left: none;
+}
+
+img {
+	max-width: 100%;
+	max-height: 100%;
+}
+
+a {
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+a:focus,
+input:focus,
+select:focus,
+textarea:focus {
+	outline: 1px solid -webkit-focus-ring-color;
+	outline-offset: -1px;
+}
+
+hr {
+	border: 0;
+	height: 2px;
+	border-bottom: 2px solid;
+}
+
+h1 {
+	padding-bottom: 0.3em;
+	line-height: 1.2;
+	border-bottom-width: 1px;
+	border-bottom-style: solid;
+}
+
+h1, h2, h3 {
+	font-weight: normal;
+}
+
+table {
+	border-collapse: collapse;
+}
+
+table > thead > tr > th {
+	text-align: left;
+	border-bottom: 1px solid;
+}
+
+table > thead > tr > th,
+table > thead > tr > td,
+table > tbody > tr > th,
+table > tbody > tr > td {
+	padding: 5px 10px;
+}
+
+table > tbody > tr + tr > td {
+	border-top: 1px solid;
+}
+
+blockquote {
+	margin: 0 7px 0 5px;
+	padding: 0 16px 0 10px;
+	border-left-width: 5px;
+	border-left-style: solid;
+}
+
+code {
+	font-family: Menlo, Monaco, Consolas, "Droid Sans Mono", "Courier New", monospace, "Droid Sans Fallback";
+	font-size: 1em;
+	line-height: 1.357em;
+}
+
+body.wordWrap pre {
+	white-space: pre-wrap;
+}
+
+pre:not(.hljs),
+pre.hljs code > div {
+	padding: 16px;
+	border-radius: 3px;
+	overflow: auto;
+}
+
+pre code {
+	color: var(--vscode-editor-foreground);
+	tab-size: 4;
+}
+
+/** Theming */
+
+.vscode-light pre {
+	background-color: rgba(220, 220, 220, 0.4);
+}
+
+.vscode-dark pre {
+	background-color: rgba(10, 10, 10, 0.4);
+}
+
+.vscode-high-contrast pre {
+	background-color: rgb(0, 0, 0);
+}
+
+.vscode-high-contrast h1 {
+	border-color: rgb(0, 0, 0);
+}
+
+.vscode-light table > thead > tr > th {
+	border-color: rgba(0, 0, 0, 0.69);
+}
+
+.vscode-dark table > thead > tr > th {
+	border-color: rgba(255, 255, 255, 0.69);
+}
+
+.vscode-light h1,
+.vscode-light hr,
+.vscode-light table > tbody > tr + tr > td {
+	border-color: rgba(0, 0, 0, 0.18);
+}
+
+.vscode-dark h1,
+.vscode-dark hr,
+.vscode-dark table > tbody > tr + tr > td {
+	border-color: rgba(255, 255, 255, 0.18);
+}
+
+</style>
+
+<style>
+/* Tomorrow Theme */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - https://github.com/chriskempson/tomorrow-theme */
+
+/* Tomorrow Comment */
+.hljs-comment,
+.hljs-quote {
+	color: #8e908c;
+}
+
+/* Tomorrow Red */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-tag,
+.hljs-name,
+.hljs-selector-id,
+.hljs-selector-class,
+.hljs-regexp,
+.hljs-deletion {
+	color: #c82829;
+}
+
+/* Tomorrow Orange */
+.hljs-number,
+.hljs-built_in,
+.hljs-builtin-name,
+.hljs-literal,
+.hljs-type,
+.hljs-params,
+.hljs-meta,
+.hljs-link {
+	color: #f5871f;
+}
+
+/* Tomorrow Yellow */
+.hljs-attribute {
+	color: #eab700;
+}
+
+/* Tomorrow Green */
+.hljs-string,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-addition {
+	color: #718c00;
+}
+
+/* Tomorrow Blue */
+.hljs-title,
+.hljs-section {
+	color: #4271ae;
+}
+
+/* Tomorrow Purple */
+.hljs-keyword,
+.hljs-selector-tag {
+	color: #8959a8;
+}
+
+.hljs {
+	display: block;
+	overflow-x: auto;
+	color: #4d4d4c;
+	padding: 0.5em;
+}
+
+.hljs-emphasis {
+	font-style: italic;
+}
+
+.hljs-strong {
+	font-weight: bold;
+}
+</style>
+
+<style>
+/*
+ * Markdown PDF CSS
+ */
+
+ body {
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI", "Ubuntu", "Droid Sans", sans-serif, "Meiryo";
+	padding: 0 12px;
+}
+
+pre {
+	background-color: #f8f8f8;
+	border: 1px solid #cccccc;
+	border-radius: 3px;
+	overflow-x: auto;
+	white-space: pre-wrap;
+	overflow-wrap: break-word;
+}
+
+pre:not(.hljs) {
+	padding: 23px;
+	line-height: 19px;
+}
+
+blockquote {
+	background: rgba(127, 127, 127, 0.1);
+	border-color: rgba(0, 122, 204, 0.5);
+}
+
+.emoji {
+	height: 1.4em;
+}
+
+code {
+	font-size: 14px;
+	line-height: 19px;
+}
+
+/* for inline code */
+:not(pre):not(.hljs) > code {
+	color: #C9AE75; /* Change the old color so it seems less like an error */
+	font-size: inherit;
+}
+
+/* Page Break : use <div class="page"/> to insert page break
+-------------------------------------------------------- */
+.page {
+	page-break-after: always;
+}
+
+</style>
+
+<script src="https://unpkg.com/mermaid/dist/mermaid.min.js"></script>
+</head>
+<body>
+  <script>
+    mermaid.initialize({
+      startOnLoad: true,
+      theme: document.body.classList.contains('vscode-dark') || document.body.classList.contains('vscode-high-contrast')
+          ? 'dark'
+          : 'default'
+    });
+  </script>
+<h1 id="eeee-e-commerce--complete-data-flow-documentation">EEEE E-Commerce — Complete Data Flow Documentation</h1>
+<hr>
+<h2 id="table-of-contents">Table of Contents</h2>
+<ol>
+<li><a href="#1-add-product-to-cart">Add Product to Cart</a></li>
+<li><a href="#2-checkout--place-order">Checkout &amp; Place Order</a></li>
+<li><a href="#3-payment-processing">Payment Processing</a></li>
+<li><a href="#4-admin-order-status-management">Admin Order Status Management</a></li>
+<li><a href="#5-complete-flow-diagram">Complete Flow Diagram</a></li>
+<li><a href="#6-database-interaction-summary">Database Interaction Summary</a></li>
+</ol>
+<hr>
+<h2 id="1-add-product-to-cart">1. Add Product to Cart</h2>
+<h3 id="flow-diagram">Flow Diagram</h3>
+<pre class="hljs"><code><div>User clicks &quot;Add to Cart&quot; on Product Detail page
+           │
+           ▼
+  ┌─────────────────────┐
+  │  Frontend:          │
+  │  ProductDetail.jsx  │
+  │  handleAddToCart()  │
+  └─────────┬───────────┘
+            │
+            ▼
+  ┌─────────────────────┐
+  │  GET /cart          │ ← Check if item already exists
+  └─────────┬───────────┘
+            │
+     ┌──────┴──────┐
+     │             │
+     ▼             ▼
+  EXISTS?      NOT EXISTS?
+     │             │
+     ▼             ▼
+  PUT /cart/    POST /cart/
+  items/{id}    items
+  {quantity}    {productId,
+  : newQty      quantity: 1}
+     │             │
+     └──────┬──────┘
+            │
+            ▼
+  ┌─────────────────────────────┐
+  │  Backend: CartController    │
+  │  → CartService.addItem()    │
+  └─────────┬───────────────────┘
+            │
+            ▼
+  ┌──────────────────────────────────────┐
+  │  1. Validate product exists &amp; active │
+  │  2. Check Inventory.hasStock(qty)    │
+  │     → availableQuantity =            │
+  │       stockQuantity - reservedQty    │
+  │  3. Find existing CartItem or create │
+  │     new one                          │
+  │  4. Update quantity                  │
+  │  5. Inventory.reserve(qty)           │
+  │     → reservedQuantity += qty        │
+  │  6. Save CartItem + Inventory        │
+  └──────────────────────────────────────┘
+            │
+            ▼
+  ┌─────────────────────────────┐
+  │  Response: Updated Cart     │
+  │  (all items with prices)    │
+  └─────────────────────────────┘
+</div></code></pre>
+<h3 id="key-code-paths">Key Code Paths</h3>
+<p><strong>Frontend:</strong> <code>frontend/src/pages/user/ProductDetail.jsx</code> → <code>handleAddToCart()</code></p>
+<pre class="hljs"><code><div><span class="hljs-keyword">const</span> handleAddToCart = <span class="hljs-keyword">async</span> () =&gt; {
+  <span class="hljs-keyword">const</span> cartRes = <span class="hljs-keyword">await</span> cartApi.getCart();
+  <span class="hljs-keyword">const</span> existingItem = cartRes.data.data?.items?.find(
+    <span class="hljs-function"><span class="hljs-params">i</span> =&gt;</span> i.product?.id === product.id || i.productId === product.id
+  );
+  <span class="hljs-keyword">if</span> (existingItem) {
+    <span class="hljs-keyword">await</span> cartApi.updateItem(existingItem.id, { <span class="hljs-attr">quantity</span>: existingItem.quantity + quantity });
+  } <span class="hljs-keyword">else</span> {
+    <span class="hljs-keyword">await</span> cartApi.addItem({ <span class="hljs-attr">productId</span>: product.id, quantity });
+  }
+};
+</div></code></pre>
+<p><strong>Backend:</strong> <code>backend/src/main/java/com/ecommerce/service/CartService.java</code> → <code>addItem()</code></p>
+<pre class="hljs"><code><div><span class="hljs-function"><span class="hljs-keyword">public</span> CartResponse <span class="hljs-title">addItem</span><span class="hljs-params">(UUID userId, AddCartItemRequest request)</span> </span>{
+    <span class="hljs-comment">// 1. Find or create cart</span>
+    Cart cart = findOrCreateCart(userId);
+    Product product = productRepository.findById(request.productId())...;
+    
+    <span class="hljs-comment">// 2. Check stock</span>
+    Inventory inventory = findInventory(product.getId());
+    <span class="hljs-keyword">if</span> (!inventory.hasStock(request.quantity())) <span class="hljs-keyword">throw</span>...
+    
+    <span class="hljs-comment">// 3. Find existing cart item or create new</span>
+    CartItem item = cartItemRepository.findByCartIdAndProductId(cart.getId(), product.getId())
+        .orElseGet(() -&gt; CartItem.builder()...quantity(<span class="hljs-number">0</span>)...build());
+    
+    <span class="hljs-comment">// 4. Update quantity &amp; reserve inventory</span>
+    item.setQuantity(item.getQuantity() + request.quantity());
+    inventory.reserve(request.quantity());
+    
+    <span class="hljs-comment">// 5. Save</span>
+    cartItemRepository.save(item);
+    inventoryRepository.save(inventory);
+}
+</div></code></pre>
+<h3 id="database-tables-affected">Database Tables Affected</h3>
+<table>
+<thead>
+<tr>
+<th>Table</th>
+<th>Operation</th>
+<th>Columns Changed</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>cart_items</code></td>
+<td>INSERT or UPDATE</td>
+<td><code>quantity</code>, <code>price_at_addition</code></td>
+</tr>
+<tr>
+<td><code>inventory</code></td>
+<td>UPDATE</td>
+<td><code>reserved_quantity += qty</code>, <code>in_stock</code> recalculated</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="2-checkout--place-order">2. Checkout &amp; Place Order</h2>
+<h3 id="flow-diagram">Flow Diagram</h3>
+<pre class="hljs"><code><div>User clicks &quot;Place Order&quot; on Checkout page
+           │
+           ▼
+  ┌─────────────────────────────┐
+  │  Frontend Validation:        │
+  │  - Address selected?        │
+  │  - Card fields valid?       │
+  │    (if card payment)        │
+  │  - UPI ID valid?            │
+  │    (if UPI payment)         │
+  └─────────┬───────────────────┘
+            │
+            ▼
+  ┌─────────────────────────────┐
+  │  POST /api/v1/orders        │
+  │  { addressId, paymentMethod,│
+  │    couponCode? }            │
+  └─────────┬───────────────────┘
+            │
+            ▼
+  ┌──────────────────────────────────────┐
+  │  Backend: OrderController            │
+  │  → OrderService.placeOrder()         │
+  └─────────┬────────────────────────────┘
+            │
+            ▼
+  ┌─────────────────────────────────────────────────────┐
+  │  1. Fetch user's cart                                │
+  │  2. Validate cart is not empty                       │
+  │  3. Calculate totalPrice from cart items             │
+  │  4. Apply coupon if present:                         │
+  │     → Validate coupon code exists                    │
+  │     → Check coupon.isValid() (active, not expired,   │
+  │       usage limit not reached)                       │
+  │     → Check minOrderAmount                           │
+  │     → Calculate discount                             │
+  │     → Increment usedCount                            │
+  │  5. Resolve shipping address from addressId          │
+  │     or shippingAddress object (snapshot)             │
+  │  6. Create Order with:                               │
+  │     → orderNumber (generated)                        │
+  │     → totalPrice, discountAmount, finalPrice         │
+  │     → orderStatus: PENDING                           │
+  │     → paymentStatus: PENDING                         │
+  │     → shippingAddress (embedded snapshot)            │
+  │  7. For each cart item:                              │
+  │     → Confirm inventory sale (reduce stock)          │
+  │     → Create OrderItem                               │
+  │  8. Create Payment record (PENDING)                  │
+  │  9. Clear cart items                                 │
+  │  10. Send notification (async)                       │
+  └─────────────────────────────────────────────────────┘
+            │
+            ▼
+  ┌─────────────────────────────┐
+  │  Response: Order with       │
+  │  orderNumber, items, status │
+  └─────────┬───────────────────┘
+            │
+            ▼
+  ┌──────────────────────────────────────┐
+  │  Frontend (Checkout.jsx):             │
+  │  Based on paymentMethod:              │
+  │                                      │
+  │  COD → POST /payments/mock-complete  │
+  │        → Order CONFIRMED             │
+  │        → Payment stays PENDING       │
+  │                                      │
+  │  CREDIT_CARD / DEBIT_CARD →          │
+  │        POST /payments/process-card   │
+  │        with cardNumber, expiry, CVV  │
+  │        → Order CONFIRMED             │
+  │        → Payment COMPLETED           │
+  │                                      │
+  │  UPI → POST /payments/process-upi    │
+  │        with upiId                    │
+  │        → Order CONFIRMED             │
+  │        → Payment COMPLETED           │
+  └──────────────────────────────────────┘
+</div></code></pre>
+<h3 id="key-code-paths">Key Code Paths</h3>
+<p><strong>Frontend:</strong> <code>frontend/src/pages/user/Checkout.jsx</code> → <code>placeOrder()</code></p>
+<pre class="hljs"><code><div><span class="hljs-keyword">const</span> placeOrder = <span class="hljs-keyword">async</span> () =&gt; {
+  <span class="hljs-comment">// Validate fields</span>
+  <span class="hljs-keyword">if</span> (paymentMethod === <span class="hljs-string">'CREDIT_CARD'</span> &amp;&amp; !validateCardFields()) <span class="hljs-keyword">return</span>;
+  <span class="hljs-keyword">if</span> (paymentMethod === <span class="hljs-string">'UPI'</span> &amp;&amp; (!upiId || !upiId.includes(<span class="hljs-string">'@'</span>))) <span class="hljs-keyword">return</span>;
+  
+  <span class="hljs-comment">// Place order</span>
+  <span class="hljs-keyword">const</span> res = <span class="hljs-keyword">await</span> orderApi.placeOrder({ <span class="hljs-attr">addressId</span>: selectedAddress, paymentMethod });
+  <span class="hljs-keyword">const</span> order = res.data.data;
+  
+  <span class="hljs-comment">// Payment processing based on method</span>
+  <span class="hljs-keyword">if</span> (paymentMethod === <span class="hljs-string">'COD'</span>) {
+    <span class="hljs-keyword">await</span> paymentApi.mockComplete({ <span class="hljs-attr">orderId</span>: order.id, paymentMethod });
+  } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (paymentMethod === <span class="hljs-string">'CREDIT_CARD'</span> || paymentMethod === <span class="hljs-string">'DEBIT_CARD'</span>) {
+    <span class="hljs-keyword">await</span> paymentApi.processCard(order.id, paymentMethod, cardDetails);
+  } <span class="hljs-keyword">else</span> <span class="hljs-keyword">if</span> (paymentMethod === <span class="hljs-string">'UPI'</span>) {
+    <span class="hljs-keyword">await</span> paymentApi.processUPI(order.id, paymentMethod, upiId);
+  }
+};
+</div></code></pre>
+<p><strong>Backend:</strong> <code>backend/src/main/java/com/ecommerce/service/OrderService.java</code> → <code>placeOrder()</code></p>
+<pre class="hljs"><code><div><span class="hljs-function"><span class="hljs-keyword">public</span> OrderResponse <span class="hljs-title">placeOrder</span><span class="hljs-params">(UUID userId, PlaceOrderRequest request)</span> </span>{
+    Cart cart = cartRepository.findByUserId(userId)...;
+    <span class="hljs-comment">// Calculate totals, apply coupon, resolve address</span>
+    
+    Order order = Order.builder()
+        .orderNumber(OrderNumberGenerator.nextOrderNumber())
+        .totalPrice(totalPrice)
+        .discountAmount(couponContext.discountAmount())
+        .finalPrice(totalPrice.subtract(couponContext.discountAmount()))
+        .orderStatus(OrderStatus.PENDING)
+        .paymentStatus(PaymentStatus.PENDING)
+        .shippingAddress(shippingAddress)
+        .user(user)
+        .build();
+    
+    <span class="hljs-comment">// Process each cart item → confirm inventory</span>
+    <span class="hljs-comment">// Create payment record</span>
+    <span class="hljs-comment">// Clear cart</span>
+}
+</div></code></pre>
+<h3 id="database-tables-affected">Database Tables Affected</h3>
+<table>
+<thead>
+<tr>
+<th>Table</th>
+<th>Operation</th>
+<th>Key Columns</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>orders</code></td>
+<td>INSERT</td>
+<td>All order details</td>
+</tr>
+<tr>
+<td><code>order_items</code></td>
+<td>INSERT (×N)</td>
+<td>quantity, purchase_price, subtotal</td>
+</tr>
+<tr>
+<td><code>inventory</code></td>
+<td>UPDATE</td>
+<td><code>stock_quantity -= qty</code>, <code>reserved_quantity -= qty</code>, <code>sold_quantity += qty</code></td>
+</tr>
+<tr>
+<td><code>payments</code></td>
+<td>INSERT</td>
+<td>amount, currency, status=PENDING, method</td>
+</tr>
+<tr>
+<td><code>coupons</code></td>
+<td>UPDATE</td>
+<td><code>used_count += 1</code> (if coupon used)</td>
+</tr>
+<tr>
+<td><code>cart_items</code></td>
+<td>DELETE ALL</td>
+<td>Cart cleared after order</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="3-payment-processing">3. Payment Processing</h2>
+<h3 id="cod-cash-on-delivery">COD (Cash on Delivery)</h3>
+<pre class="hljs"><code><div>POST /payments/mock-complete { orderId, paymentMethod: &quot;COD&quot; }
+         │
+         ▼
+  ┌──────────────────────────────────────┐
+  │  PaymentService.completeMockPayment  │
+  │                                      │
+  │  1. Validate: method == COD only     │
+  │     (throws BadRequestException      │
+  │      for CREDIT_CARD, UPI, etc.)     │
+  │                                      │
+  │  2. Create/find Payment record       │
+  │     → method: COD                    │
+  │     → status: PENDING (not paid yet) │
+  │     → paidAt: null                   │
+  │                                      │
+  │  3. Update Order:                    │
+  │     → orderStatus: CONFIRMED         │
+  │     → paymentStatus: PENDING         │
+  │                                      │
+  │  4. Send notification (async)        │
+  └──────────────────────────────────────┘
+</div></code></pre>
+<h3 id="credit-card--debit-card">Credit Card / Debit Card</h3>
+<pre class="hljs"><code><div>POST /payments/process-card { orderId, paymentMethod,
+  cardNumber, cardHolderName, expiryDate, cvv }
+         │
+         ▼
+  ┌──────────────────────────────────────┐
+  │  PaymentService.processCardPayment   │
+  │                                      │
+  │  1. Validate: method is CREDIT_CARD  │
+  │     or DEBIT_CARD                    │
+  │                                      │
+  │  2. Validate card details:           │
+  │     → cardNumber: 16 digits          │
+  │     → cardHolderName: not empty      │
+  │     → expiryDate: MM/YY format       │
+  │     → cvv: 3 or 4 digits            │
+  │                                      │
+  │  3. Process payment (simulated):     │
+  │     → Generate mock transaction IDs  │
+  │     → status: COMPLETED              │
+  │     → paidAt: now                    │
+  │                                      │
+  │  4. Update Order:                    │
+  │     → paymentStatus: COMPLETED       │
+  │     → orderStatus: CONFIRMED         │
+  │                                      │
+  │  5. Log masked card info             │
+  └──────────────────────────────────────┘
+</div></code></pre>
+<h3 id="upi">UPI</h3>
+<pre class="hljs"><code><div>POST /payments/process-upi { orderId, paymentMethod, upiId }
+         │
+         ▼
+  ┌──────────────────────────────────────┐
+  │  PaymentService.processUPIPayment    │
+  │                                      │
+  │  1. Validate: method == UPI          │
+  │                                      │
+  │  2. Validate UPI ID:                 │
+  │     → Must contain &quot;@&quot;               │
+  │     → Must not be empty              │
+  │                                      │
+  │  3. Process payment (simulated):     │
+  │     → Generate mock transaction IDs  │
+  │     → status: COMPLETED              │
+  │     → paidAt: now                    │
+  │                                      │
+  │  4. Update Order:                    │
+  │     → paymentStatus: COMPLETED       │
+  │     → orderStatus: CONFIRMED         │
+  └──────────────────────────────────────┘
+</div></code></pre>
+<h3 id="payment-status-lifecycle">Payment Status Lifecycle</h3>
+<pre class="hljs"><code><div>PENDING ──→ COMPLETED (card/UPI success, or COD delivered)
+    │
+    ├──→ FAILED (card declined, verification failed)
+    │
+    └──→ REFUNDED (order cancelled after payment completed)
+</div></code></pre>
+<hr>
+<h2 id="4-admin-order-status-management">4. Admin Order Status Management</h2>
+<h3 id="flow-diagram">Flow Diagram</h3>
+<pre class="hljs"><code><div>Admin navigates to Admin Orders page
+           │
+           ▼
+  ┌─────────────────────────────┐
+  │  GET /api/v1/admin/orders   │
+  │  → Returns ALL orders       │
+  │    with admin details       │
+  └─────────┬───────────────────┘
+            │
+            ▼
+  ┌─────────────────────────────┐
+  │  Admin selects an order &amp;   │
+  │  changes status via dropdown│
+  └─────────┬───────────────────┘
+            │
+            ▼
+  ┌─────────────────────────────┐
+  │  PATCH /api/v1/admin/orders │
+  │  /{orderId}/status          │
+  │  { orderStatus }            │
+  └─────────┬───────────────────┘
+            │
+            ▼
+  ┌──────────────────────────────────────┐
+  │  Backend: AdminOrderController       │
+  │  → OrderService.updateOrderStatus()  │
+  └─────────┬────────────────────────────┘
+            │
+            ▼
+  ┌─────────────────────────────────────────────────────┐
+  │  1. Find order by ID                                │
+  │                                                     │
+  │  2. Update orderStatus                              │
+  │                                                     │
+  │  3. Special Logic:                                  │
+  │     ┌─────────────────────────────────────┐         │
+  │     │ If status → DELIVERED:              │         │
+  │     │   AND paymentStatus is PENDING:     │         │
+  │     │   → Set paymentStatus = COMPLETED   │         │
+  │     │   (COD orders get paid on delivery) │         │
+  │     └─────────────────────────────────────┘         │
+  │                                                     │
+  │     ┌─────────────────────────────────────┐         │
+  │     │ If status → CANCELLED:              │         │
+  │     │   1. restockItems(order):           │         │
+  │     │      For each order item:           │         │
+  │     │      → stockQuantity += qty         │         │
+  │     │      → soldQuantity -= qty          │         │
+  │     │      → inStock recalculated         │         │
+  │     │   2. If payment was COMPLETED:      │         │
+  │     │      → paymentStatus = REFUNDED     │         │
+  │     └─────────────────────────────────────┘         │
+  │                                                     │
+  │  4. Save order                                      │
+  │  5. Send notification (async)                       │
+  └─────────────────────────────────────────────────────┘
+            │
+            ▼
+  ┌─────────────────────────────┐
+  │  Response: Updated Order    │
+  │  with new status &amp; timestamp│
+  └─────────────────────────────┘
+</div></code></pre>
+<h3 id="allowed-status-transitions">Allowed Status Transitions</h3>
+<pre class="hljs"><code><div>                    ┌──────────┐
+                    │ PENDING  │
+                    └────┬─────┘
+                         │
+                    ┌────▼─────┐
+              ┌─────│ CONFIRMED│─────┐
+              │     └────┬─────┘     │
+              │          │           │
+         ┌────▼────┐ ┌──▼──────┐    │
+         │CANCELLED│ │PROCESSING│    │
+         └─────────┘ └──┬──────┘    │
+                        │           │
+                   ┌────▼─────┐     │
+                   │ SHIPPED  │     │
+                   └────┬─────┘     │
+                        │           │
+                   ┌────▼──────┐    │
+                   │ DELIVERED │    │
+                   └────┬──────┘    │
+                        │           │
+                   ┌────▼─────┐     │
+                   │ RETURNED │     │
+                   └──────────┘     │
+                              ┌─────▼─────┐
+                              │ CANCELLED │
+                              └───────────┘
+</div></code></pre>
+<h3 id="key-code-paths">Key Code Paths</h3>
+<p><strong>Backend:</strong> <code>backend/src/main/java/com/ecommerce/service/OrderService.java</code> → <code>updateOrderStatus()</code></p>
+<pre class="hljs"><code><div><span class="hljs-function"><span class="hljs-keyword">public</span> OrderResponse <span class="hljs-title">updateOrderStatus</span><span class="hljs-params">(UUID orderId, OrderStatus status)</span> </span>{
+    Order order = orderRepository.findWithDetailsById(orderId)...;
+    
+    order.setOrderStatus(status);
+    
+    <span class="hljs-comment">// If delivered with pending payment (COD), mark as completed</span>
+    <span class="hljs-keyword">if</span> (status == OrderStatus.DELIVERED &amp;&amp; order.getPaymentStatus() == PaymentStatus.PENDING) {
+        order.setPaymentStatus(PaymentStatus.COMPLETED);
+    }
+    
+    <span class="hljs-comment">// If cancelled, restock items</span>
+    <span class="hljs-keyword">if</span> (status == OrderStatus.CANCELLED) {
+        restockItems(order);
+    }
+    
+    Order saved = orderRepository.save(order);
+    notificationService.sendOrderStatusChangedNotification(saved);
+}
+</div></code></pre>
+<p><strong>Backend:</strong> <code>restockItems()</code> method</p>
+<pre class="hljs"><code><div><span class="hljs-function"><span class="hljs-keyword">private</span> <span class="hljs-keyword">void</span> <span class="hljs-title">restockItems</span><span class="hljs-params">(Order order)</span> </span>{
+    <span class="hljs-keyword">for</span> (OrderItem item : order.getItems()) {
+        Inventory inventory = inventoryRepository.findByProductId(item.getProduct().getId())...;
+        inventory.setStockQuantity(inventory.getStockQuantity() + item.getQuantity());
+        inventory.setSoldQuantity(Math.max(<span class="hljs-number">0</span>, inventory.getSoldQuantity() - item.getQuantity()));
+        inventory.setInStock(inventory.getAvailableQuantity() &gt; <span class="hljs-number">0</span>);
+        inventoryRepository.save(inventory);
+    }
+}
+</div></code></pre>
+<hr>
+<h2 id="5-complete-flow-diagram">5. Complete Flow Diagram</h2>
+<pre class="hljs"><code><div>                         COMPLETE ORDER-TO-DELIVERY FLOW
+                         ═══════════════════════════════
+
+  USER                        FRONTEND                      BACKEND                      DATABASE
+  ────                        ────────                      ───────                      ────────
+   │                             │                             │                            │
+   ├── Browse Products ─────────→ GET /search/products ──────→ ProductController ──────────→ products
+   │                             │                             │                            │
+   ├── Add to Cart ────────────→ POST /cart/items ──────────→ CartService.addItem() ───────→ cart_items (+)
+   │                             │                             │                            inventory (reserve)
+   │                             │                             │                            │
+   ├── View Cart ──────────────→ GET /cart ──────────────────→ CartService.getCart() ──────→ cart_items
+   │                             │                             │                            │
+   ├── Apply Coupon ───────────→ POST /coupons/validate ─────→ CouponService.validate() ───→ coupons
+   │                             │                             │                            │
+   ├── Proceed to Checkout ────→ Navigate to /checkout ──────→ GET /addresses ────────────→ addresses
+   │                             │                             │                            │
+   ├── Select Address ─────────→ (local state)                 │                            │
+   │                             │                             │                            │
+   ├── Select Payment Method ──→ (local state)                 │                            │
+   │                             │                             │                            │
+   ├── Enter Card/UPI Details ─→ (local state, validated)      │                            │
+   │                             │                             │                            │
+   ├── Place Order ────────────→ POST /orders ───────────────→ OrderService.placeOrder() ──→ orders (INSERT)
+   │                             │                             │                            order_items (INSERT)
+   │                             │                             │                            inventory (confirm sale)
+   │                             │                             │                            coupons (used_count++)
+   │                             │                             │                            cart_items (DELETE)
+   │                             │                             │                            payments (INSERT)
+   │                             │                             │                            │
+   ├── [If COD] ───────────────→ POST /payments/mock-complete → PaymentService.             payments (status)
+   │                             │                             completeMockPayment()         orders (confirmed)
+   │                             │                             │                            │
+   ├── [If Card] ──────────────→ POST /payments/process-card  → PaymentService.             payments (completed)
+   │                             │                             processCardPayment()          orders (confirmed)
+   │                             │                             │                            │
+   ├── [If UPI] ───────────────→ POST /payments/process-upi   → PaymentService.             payments (completed)
+   │                             │                             processUPIPayment()           orders (confirmed)
+   │                             │                             │                            │
+   │                             │                             │                            │
+  ADMIN                         FRONTEND (ADMIN)               BACKEND                      DATABASE
+  ─────                         ────────────────               ───────                      ───────
+   │                             │                             │                            │
+   ├── View All Orders ────────→ GET /admin/orders ──────────→ AdminOrderController ───────→ orders (+items)
+   │                             │                             │                            │
+   ├── Change Status ──────────→ PATCH /admin/orders/{id}/    → OrderService.               orders (status)
+   │                             │ status                      updateOrderStatus()          inventory (restock)
+   │                             │                             │                            payments (refund)
+   │                             │                             │                            │
+   │    PENDING → CONFIRMED ────→ (select in dropdown) ───────→ status updated              │
+   │    CONFIRMED → PROCESSING ──→ (select in dropdown) ───────→ status updated              │
+   │    PROCESSING → SHIPPED ────→ (select in dropdown) ───────→ status updated              │
+   │    SHIPPED → DELIVERED ─────→ (select in dropdown) ───────→ status + payment update     │
+   │    ANY → CANCELLED ─────────→ (select in dropdown) ───────→ status + restock + refund   │
+   │                             │                             │                            │
+</div></code></pre>
+<hr>
+<h2 id="6-database-interaction-summary">6. Database Interaction Summary</h2>
+<h3 id="tables-readwritten-per-operation">Tables Read/Written per Operation</h3>
+<table>
+<thead>
+<tr>
+<th>Operation</th>
+<th>Tables Read</th>
+<th>Tables Written</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Browse Products</strong></td>
+<td><code>products</code>, <code>categories</code>, <code>inventory</code>, <code>product_images</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>Add to Cart</strong></td>
+<td><code>carts</code>, <code>products</code>, <code>inventory</code></td>
+<td><code>cart_items</code> (I/U), <code>inventory</code> (U)</td>
+</tr>
+<tr>
+<td><strong>View Cart</strong></td>
+<td><code>carts</code>, <code>cart_items</code>, <code>products</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>Apply Coupon</strong></td>
+<td><code>coupons</code></td>
+<td>— (read-only validation)</td>
+</tr>
+<tr>
+<td><strong>Place Order</strong></td>
+<td><code>carts</code>, <code>cart_items</code>, <code>products</code>, <code>inventory</code>, <code>addresses</code>, <code>users</code>, <code>coupons</code></td>
+<td><code>orders</code> (I), <code>order_items</code> (I), <code>inventory</code> (U), <code>coupons</code> (U), <code>payments</code> (I), <code>cart_items</code> (D)</td>
+</tr>
+<tr>
+<td><strong>Process Payment</strong></td>
+<td><code>orders</code>, <code>payments</code></td>
+<td><code>payments</code> (U), <code>orders</code> (U)</td>
+</tr>
+<tr>
+<td><strong>Admin List Orders</strong></td>
+<td><code>orders</code>, <code>order_items</code>, <code>users</code>, <code>payments</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td><strong>Admin Update Status</strong></td>
+<td><code>orders</code>, <code>order_items</code>, <code>inventory</code></td>
+<td><code>orders</code> (U), <code>inventory</code> (U), <code>payments</code> (U)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="legend">Legend</h3>
+<ul>
+<li><strong>(I)</strong> = INSERT</li>
+<li><strong>(U)</strong> = UPDATE</li>
+<li><strong>(D)</strong> = DELETE</li>
+<li><strong>—</strong> = No write</li>
+</ul>
+<hr>
+<h2 id="inventory-state-changes-summary">Inventory State Changes Summary</h2>
+<pre class="hljs"><code><div>                    ┌──────────────┐
+                    │  Available = │
+                    │  stock -     │
+                    │  reserved    │
+                    └──────┬───────┘
+                           │
+    Add to Cart            │   Place Order         Cancel Order
+    ───────────            │   ───────────         ────────────
+    reserved  += qty       │   stock    -= qty     stock     += qty
+    available -= qty       │   reserved -= qty     sold     -= qty
+                           │   sold     += qty     in_stock  = calc
+                           │
+                    ┌──────▼───────┐
+                    │  Remove from  │
+                    │  Cart         │
+                    │  reserved -=  │
+                    │  available += │
+                    └──────────────┘
+</div></code></pre>
+<hr>
+<p><em>Document generated from complete source code analysis of backend and frontend. All flows verified against actual implementation.</em></p>
+
+</body>
+</html>

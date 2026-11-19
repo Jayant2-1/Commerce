@@ -99,9 +99,16 @@ export default function Wishlists() {
                     <div key={item.id} className="wishlist-item">
                       <div className="wishlist-item-image">
                         {item.product?.images?.[0]?.imageUrl ? (
-                          <img src={item.product?.images?.[0]?.imageUrl} alt={item.product?.name} />
+                          <img
+                            src={item.product.images[0].imageUrl}
+                            alt={item.product.images[0].altText || item.product.name}
+                            onError={(e) => { e.currentTarget.src = '/images/product-placeholder.svg'; }}
+                          />
                         ) : (
-                          <div className="product-placeholder small">{item.product?.name?.charAt(0)}</div>
+                          <img
+                            src="/images/product-placeholder.svg"
+                            alt={`${item.product?.name || 'Product'} image unavailable`}
+                          />
                         )}
                       </div>
                       <div className="wishlist-item-info">
