@@ -21,7 +21,9 @@ public class UserMapper {
                 user.getIsEmailVerified(),
                 user.getPhone(),
                 user.getProfileImageUrl(),
-                user.getCreatedAt()
+                user.getCreatedAt(),
+                user.getUpdatedAt(),
+                user.getLastLoginAt()
         );
     }
 }

@@ -20,6 +20,8 @@ export const adminApi = {
 
   // Users
   listUsers: () => axios.get('/admin/users'),
+  createUser: (data) => axios.post('/admin/users', data),
+  updateUser: (id, data) => axios.put(`/admin/users/${id}`, data),
   updateUserStatus: (id, active) => axios.patch(`/admin/users/${id}/status`, { active }),
   deleteUser: (id) => axios.delete(`/admin/users/${id}`),
 

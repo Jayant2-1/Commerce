@@ -7,6 +7,7 @@ import { reviewApi } from '../../api/reviews';
 import { useAuth } from '../../context/AuthContext';
 import { toast } from 'react-toastify';
 import { FiStar, FiShoppingCart, FiHeart, FiMinus, FiPlus } from 'react-icons/fi';
+import { getProductImageUrl } from '../../utils/productMedia';
 
 export default function ProductDetail() {
   const { slug } = useParams();
@@ -74,6 +75,10 @@ export default function ProductDetail() {
   if (!product) return null;
 
   const allImages = product.images || [];
+  const activeImageData = allImages[activeImage];
+  const mainImageUrl = activeImageData
+    ? getProductImageUrl({ ...product, images: [activeImageData] }, activeImage)
+    : getProductImageUrl(product);
   const inStock = product.inventory?.inStock && product.inventory?.availableQuantity > 0;
 
   return (
@@ -81,10 +86,10 @@ export default function ProductDetail() {
       <div className="product-detail">
         <div className="product-gallery">
           <div className="main-image">
-            {allImages[activeImage]?.imageUrl ? (
+            {mainImageUrl ? (
               <img
-                src={allImages[activeImage].imageUrl}
-                alt={allImages[activeImage].altText || product.name}
+                src={mainImageUrl}
+                alt={activeImageData?.altText || product.name}
                 onError={(e) => { e.currentTarget.src = '/images/product-placeholder.svg'; }}
               />
             ) : (
@@ -96,7 +101,7 @@ export default function ProductDetail() {
               {allImages.map((img, i) => (
                 <button key={i} className={i === activeImage ? 'active' : ''} onClick={() => setActiveImage(i)}>
                   <img
-                    src={img.imageUrl}
+                    src={getProductImageUrl({ ...product, images: [img] }, i) || '/images/product-placeholder.svg'}
                     alt={img.altText || ''}
                     onError={(e) => { e.currentTarget.src = '/images/product-placeholder.svg'; }}
                   />

@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { toast } from 'react-toastify';
 import { FiUser, FiMail, FiLock, FiEye, FiEyeOff, FiPhone } from 'react-icons/fi';
+import AuthVideoBackground from '../../components/AuthVideoBackground';
 
 export default function Register() {
   const { register } = useAuth();
@@ -27,11 +28,12 @@ export default function Register() {
 
   return (
     <div className="auth-page">
+      <AuthVideoBackground />
       <div className="auth-card">
         <div className="auth-header">
           <span className="auth-icon">✦</span>
           <h2>Create Account</h2>
-          <p>Join VELORA today</p>
+          <p>Join Commerce today</p>
         </div>
         <form onSubmit={handleSubmit}>
           <div className="input-group">

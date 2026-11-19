@@ -105,35 +105,40 @@ function hashCode(str) {
 }
 
 export const getProductImageUrl = (productOrItem, offset = 0) => {
-  // Check stored images first  
+  // Keep product-specific uploads, but replace generic category art with product imagery.
   const stored = productOrItem?.images?.[0]?.imageUrl || 
                   productOrItem?.images?.[0]?.url || 
                   productOrItem?.imageUrl;
-  if (stored && !stored.includes('placeholder')) return stored;
+  const isGenericImage = stored && (
+    /placeholder/i.test(stored) ||
+    /(?:^|\/)category-[^/?#]+\.(?:svg|png|jpe?g|webp)(?:[?#]|$)/i.test(stored)
+  );
+  if (stored && !isGenericImage) return stored;
 
   if (!productOrItem) return null;
 
   // Detect category from various possible field names
-  let categoryName = productOrItem.categoryName || 
-                     productOrItem.category || 
-                     productOrItem.brand || 
-                     productOrItem.categorySlug || '';
-                     
-  // Normalize
-  const normalized = categoryName.trim();
+  const categoryName = productOrItem.categoryName ||
+    productOrItem.category ||
+    productOrItem.categorySlug ||
+    '';
+  const normalized = String(categoryName).trim();
   
   // Find matching category
-  let catIndex = CATEGORY_ORDER.findIndex(c => 
-    normalized.toLowerCase() === c.toLowerCase() ||
-    normalized.toLowerCase().includes(c.toLowerCase()) ||
-    c.toLowerCase().includes(normalized.toLowerCase())
-  );
+  let catIndex = normalized
+    ? CATEGORY_ORDER.findIndex(c =>
+      normalized.toLowerCase() === c.toLowerCase() ||
+      normalized.toLowerCase().includes(c.toLowerCase()) ||
+      c.toLowerCase().includes(normalized.toLowerCase())
+    )
+    : -1;
   
   if (catIndex === -1) {
     // Fallback: try matching brand field
-    catIndex = CATEGORY_ORDER.findIndex(c =>
-      (productOrItem.brand || '').toLowerCase() === c.toLowerCase()
-    );
+    const brand = String(productOrItem.brand || '').trim().toLowerCase();
+    catIndex = brand
+      ? CATEGORY_ORDER.findIndex(c => brand === c.toLowerCase())
+      : -1;
   }
   
   if (catIndex === -1) {
@@ -149,7 +154,7 @@ export const getProductImageUrl = (productOrItem, offset = 0) => {
   const id = productOrItem.id || productOrItem.productId || '';
   const name = productOrItem.name || productOrItem.productName || '';
   const hash = hashCode(id + name);
-  const imageIndex = hash % images.length;
+  const imageIndex = ((hash + Math.trunc(offset)) % images.length + images.length) % images.length;
   
   return images[imageIndex];
 };

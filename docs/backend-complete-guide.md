@@ -680,28 +680,33 @@ A: 1) Real payment gateway integration (Razorpay/Stripe), 2) Email notifications
 # Rebuild backend after fixes
 cd backend && ./mvnw clean package -DskipTests
 
-# Restart the backend
-# (kill existing process first, then:)
-mvn spring-boot:run
+# Start the backend with the local demo data profile
+./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
+
+# Local-only demo credentials (override with DEMO_ADMIN_PASSWORD /
+# DEMO_CUSTOMER_PASSWORD if needed)
+# Admin: admin@commerce.local / CommerceAdmin2026!
+# Customer: alex.morgan@commerce.local / CommerceCustomer2026!
 
 # Test the register fix
 curl -X POST http://localhost:8081/api/v1/auth/register \
   -H "Content-Type: application/json" \
   -d '{"fullName":"John","email":"john@test.com","password":"pass1234","phone":"9876543210"}'
 
-# Test payment flow:
-# 1. Place order with card
+# Test mock payment flow after placing an order:
 curl -X POST http://localhost:8081/api/v1/orders \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -d '{"addressId":"ADDR_UUID","paymentMethod":"CREDIT_CARD"}'
 
-# 2. Process card payment (card details are now REQUIRED)
-curl -X POST http://localhost:8081/api/v1/payments/process-card \
+# Complete the local mock payment
+curl -X POST http://localhost:8081/api/v1/payments/mock-complete \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_TOKEN" \
-  -d '{"orderId":"ORDER_UUID","paymentMethod":"CREDIT_CARD","cardNumber":"4111111111111111","cardHolderName":"John Doe","expiryDate":"12/28","cvv":"123"}'
+  -d '{"orderId":"ORDER_UUID","paymentMethod":"CREDIT_CARD"}'
 ```
+
+The `dev` profile idempotently creates five sample accounts and approved product reviews after the catalog migrations run. It is not active outside the development profile.
 
 ---
 

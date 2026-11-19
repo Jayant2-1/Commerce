@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import authBackgroundVideo from '../../images/16.mp4';
 
 export default function AuthVideoBackground() {
   const videoRef = useRef(null);
@@ -23,8 +24,8 @@ export default function AuthVideoBackground() {
 
   return (
     <div className="auth-video-bg" aria-hidden="true">
-      <video ref={videoRef} autoPlay muted loop playsInline className="bg-video">
-        <source src="/images/16.mp4" type="video/mp4" />
+      <video ref={videoRef} autoPlay muted loop playsInline poster="/images/fashion-6.jpg" className="bg-video">
+        <source src={authBackgroundVideo} type="video/mp4" />
       </video>
     </div>
   );

@@ -214,7 +214,7 @@ export default function AdminDashboard() {
                         <td>{u.fullName}</td>
                         <td>{u.email}</td>
                         <td>{u.role?.replace(/^ROLE_/, '')}</td>
-                        <td><span className={`badge ${u.active ? 'active' : 'inactive'}`}>{u.active ? 'Active' : 'Inactive'}</span></td>
+                        <td><span className={`badge ${u.isActive ? 'active' : 'inactive'}`}>{u.isActive ? 'Active' : 'Inactive'}</span></td>
                       </tr>
                     ))}
                   </tbody>

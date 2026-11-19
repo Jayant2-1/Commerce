@@ -3,16 +3,23 @@ import { Link } from 'react-router-dom';
 import { wishlistApi } from '../../api/wishlist';
 import { FiHeart, FiTrash2, FiShoppingCart, FiPlus } from 'react-icons/fi';
 import { toast } from 'react-toastify';
+import { getProductImageUrl } from '../../utils/productMedia';
 
 export default function Wishlists() {
   const [wishlists, setWishlists] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
   const [newName, setNewName] = useState('');
 
   const fetchWishlists = () => {
     wishlistApi.getAll()
-      .then((res) => setWishlists(res.data.data || []))
-      .catch(() => setWishlists([]))
+      .then((res) => {
+        const data = res.data?.data;
+        if (!Array.isArray(data)) throw new Error('The wishlists response was not a list.');
+        setWishlists(data);
+        setLoadError('');
+      })
+      .catch((error) => setLoadError(error.response?.data?.message || error.message || 'Could not load wishlists.'))
       .finally(() => setLoading(false));
   };
 
@@ -31,12 +38,13 @@ export default function Wishlists() {
   };
 
   const deleteWishlist = async (id) => {
+    if (!window.confirm('Delete this wishlist?')) return;
     try {
       await wishlistApi.delete(id);
       fetchWishlists();
       toast.success('Wishlist deleted');
     } catch (err) {
-      toast.error('Failed to delete');
+      toast.error(err.response?.data?.message || err.message || 'Failed to delete wishlist');
     }
   };
 
@@ -46,7 +54,7 @@ export default function Wishlists() {
       fetchWishlists();
       toast.success('Item removed');
     } catch (err) {
-      toast.error('Failed to remove');
+      toast.error(err.response?.data?.message || err.message || 'Failed to remove item');
     }
   };
 
@@ -78,7 +86,14 @@ export default function Wishlists() {
         </div>
       </div>
 
-      {wishlists.length === 0 ? (
+      {loadError && (
+        <div className="admin-error" role="alert">
+          <span>{loadError}</span>
+          <button type="button" onClick={() => { setLoading(true); fetchWishlists(); }}>Try again</button>
+        </div>
+      )}
+
+      {loadError ? null : wishlists.length === 0 ? (
         <div className="empty-state">
           <FiHeart size={48} />
           <h3>No wishlists yet</h3>
@@ -98,18 +113,11 @@ export default function Wishlists() {
                   {wl.items.map((item) => (
                     <div key={item.id} className="wishlist-item">
                       <div className="wishlist-item-image">
-                        {item.product?.images?.[0]?.imageUrl ? (
-                          <img
-                            src={item.product.images[0].imageUrl}
-                            alt={item.product.images[0].altText || item.product.name}
-                            onError={(e) => { e.currentTarget.src = '/images/product-placeholder.svg'; }}
-                          />
-                        ) : (
-                          <img
-                            src="/images/product-placeholder.svg"
-                            alt={`${item.product?.name || 'Product'} image unavailable`}
-                          />
-                        )}
+                        <img
+                          src={getProductImageUrl(item.product) || '/images/product-placeholder.svg'}
+                          alt={item.product?.images?.[0]?.altText || item.product?.name || 'Product'}
+                          onError={(e) => { e.currentTarget.src = '/images/product-placeholder.svg'; }}
+                        />
                       </div>
                       <div className="wishlist-item-info">
                         <Link to={`/product/${item.product?.slug}`}><h4>{item.product?.name}</h4></Link>
