@@ -102,9 +102,9 @@ export default function Checkout() {
     return <div className="empty-cart"><h2>Your cart is empty</h2><button onClick={() => navigate('/shop')}>Shop Now</button></div>;
   }
 
-  const total = cart.subtotal || 0;
-  const shipping = total >= 999 ? 0 : 49;
-  const finalTotal = total + shipping;
+  const total = Number(cart.subtotal ?? 0);
+  const shipping = Number(cart.shippingAmount ?? 0);
+  const finalTotal = Number(cart.totalAmount ?? total + shipping);
 
   return (
     <div className="checkout-page">
@@ -166,8 +166,8 @@ export default function Checkout() {
             <h2>Order Items</h2>
             {cart.items.map((item) => (
               <div key={item.id} className="checkout-item">
-                <span>{item.productName} × {item.quantity}</span>
-                <span>₹{(item.unitPrice * item.quantity)?.toLocaleString()}</span>
+                <span>{item.product?.name} × {item.quantity}</span>
+                <span>₹{Number(item.subtotal ?? 0).toLocaleString()}</span>
               </div>
             ))}
           </section>

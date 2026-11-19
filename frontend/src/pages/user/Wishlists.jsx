@@ -98,15 +98,15 @@ export default function Wishlists() {
                   {wl.items.map((item) => (
                     <div key={item.id} className="wishlist-item">
                       <div className="wishlist-item-image">
-                        {item.imageUrl ? (
-                          <img src={item.imageUrl} alt={item.productName} />
+                        {item.product?.images?.[0]?.imageUrl ? (
+                          <img src={item.product?.images?.[0]?.imageUrl} alt={item.product?.name} />
                         ) : (
-                          <div className="product-placeholder small">{item.productName?.charAt(0)}</div>
+                          <div className="product-placeholder small">{item.product?.name?.charAt(0)}</div>
                         )}
                       </div>
                       <div className="wishlist-item-info">
-                        <Link to={`/product/${item.productSlug}`}><h4>{item.productName}</h4></Link>
-                        <p>₹{item.price?.toLocaleString()}</p>
+                        <Link to={`/product/${item.product?.slug}`}><h4>{item.product?.name}</h4></Link>
+                        <p>₹{item.product?.effectivePrice?.toLocaleString()}</p>
                       </div>
                       <div className="wishlist-item-actions">
                         <button className="btn-small" onClick={() => moveToCart(wl.id, item.id)} title="Move to Cart"><FiShoppingCart /></button>

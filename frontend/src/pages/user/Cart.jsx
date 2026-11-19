@@ -59,9 +59,7 @@ export default function Cart() {
     }
   };
 
-  const getItemPrice = (item) => {
-    return item.priceAtAddition || item.product?.price || 0;
-  };
+  const getItemPrice = (item) => Number(item.priceAtAddition ?? item.product?.effectivePrice ?? item.product?.price ?? 0);
 
   if (loading) return <div className="page-loading"><div className="spinner" /></div>;
 
@@ -76,9 +74,9 @@ export default function Cart() {
     );
   }
 
-  const total = cart.subtotal || 0;
-  const shipping = total >= 999 ? 0 : 49;
-  const finalTotal = total + shipping - couponDiscount;
+  const total = Number(cart.subtotal ?? 0);
+  const shipping = Number(cart.shippingAmount ?? 0);
+  const finalTotal = Number(cart.totalAmount ?? total + shipping) - couponDiscount;
 
   return (
     <div className="cart-page">
@@ -88,14 +86,14 @@ export default function Cart() {
           {cart.items.map((item) => (
             <div key={item.id} className="cart-item">
               <div className="cart-item-image">
-                {item.imageUrl ? (
-                  <img src={item.imageUrl} alt={item.productName} />
+                {item.product?.images?.[0]?.imageUrl ? (
+                  <img src={item.product.images[0].imageUrl} alt={item.product.name} />
                 ) : (
-                  <div className="product-placeholder">{item.productName?.charAt(0)}</div>
+                  <div className="product-placeholder">{item.product?.name?.charAt(0)}</div>
                 )}
               </div>
               <div className="cart-item-info">
-                <Link to={`/product/${item.productSlug}`}><h3>{item.productName}</h3></Link>
+                <Link to={`/product/${item.product?.slug}`}><h3>{item.product?.name}</h3></Link>
                 <p className="cart-item-price">₹{getItemPrice(item)?.toLocaleString()}</p>
               </div>
               <div className="cart-item-qty">

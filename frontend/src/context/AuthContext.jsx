@@ -42,7 +42,10 @@ export function AuthProvider({ children }) {
   };
 
   const register = async (data) => {
-    const res = await authApi.register(data);
+    const res = await authApi.register({
+      ...data,
+      phone: data.phone?.trim() || null,
+    });
     const { accessToken, refreshToken, user: u } = res.data.data;
     localStorage.setItem('accessToken', accessToken);
     localStorage.setItem('refreshToken', refreshToken);

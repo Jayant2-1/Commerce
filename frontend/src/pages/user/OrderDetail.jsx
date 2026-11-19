@@ -115,13 +115,13 @@ export default function OrderDetail() {
         {order.items?.map((item) => (
           <div key={item.id} className="order-item">
             <div className="order-item-image">
-              {item.imageUrl ? <img src={item.imageUrl} alt={item.productName} /> : <div className="product-placeholder">{item.productName?.charAt(0)}</div>}
+              <div className="product-placeholder">{item.productName?.charAt(0)}</div>
             </div>
             <div className="order-item-info">
               <h4>{item.productName}</h4>
-              <p>Qty: {item.quantity} × ₹{item.unitPrice?.toLocaleString()}</p>
+              <p>Qty: {item.quantity} × ₹{item.purchasePrice?.toLocaleString()}</p>
             </div>
-            <div className="order-item-total">₹{(item.quantity * item.unitPrice)?.toLocaleString()}</div>
+            <div className="order-item-total">₹{item.subtotal?.toLocaleString()}</div>
           </div>
         ))}
       </div>
