@@ -43,6 +43,9 @@ function App() {
               <Route path="reviews" element={<AdminReviews />} />
             </Route>
 
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+
             {/* Public with Navbar */}
             <Route path="*" element={
               <>
@@ -58,8 +61,6 @@ function App() {
                     <Route path="/orders/:id" element={<OrderDetail />} />
                     <Route path="/profile" element={<Profile />} />
                     <Route path="/wishlists" element={<Wishlists />} />
-                    <Route path="/login" element={<Login />} />
-                    <Route path="/register" element={<Register />} />
                   </Routes>
                 </main>
                 <footer className="footer">
